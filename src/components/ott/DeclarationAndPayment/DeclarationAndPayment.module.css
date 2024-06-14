@@ -1,0 +1,27 @@
+.formCheckInput {
+    width: 15px; /* Adjust width as needed */
+    height: 15px; /* Adjust height as needed */
+    transform: scale(1.5); /* Adjust scale as needed */
+    background-color: #813256;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 5px; /* Adjust space between radio button and label */
+}
+
+.formCheckLabel {
+    font-size: 30px; /* Adjust font size as needed */
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.form-check {
+    display: inline-block;
+    background-color: greenyellow;
+}
+.payment{
+    color: greenyellow;
+}
+
+.entry{
+    color: green !important;
+}

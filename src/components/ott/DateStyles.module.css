@@ -1,0 +1,19 @@
+.release_date{
+    width: 100%;
+}
+
+.form_control{
+    width: 100%;
+}
+
+.MuiOutlinedInput-root{
+    height: 48px;
+    width: 100%;
+    border-radius: 5px;
+
+}
+
+.right_align {
+    display: flex;
+    justify-content: flex-end;
+}

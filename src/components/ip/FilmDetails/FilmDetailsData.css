@@ -1,0 +1,14 @@
+.nav-pills .nav-link {
+    background-color: transparent;
+    border: none;
+  }
+  
+  .nav-pills .nav-link.active,
+  .nav-pills .nav-link:focus,
+  .nav-pills .nav-link:hover {
+    background-color: transparent;
+    border: none;
+    color: #973a64;
+    text-decoration: underline;
+  }
+  
