@@ -4,13 +4,14 @@ import InputAdornment from '@mui/material/InputAdornment';
 import EmailIcon from '@mui/icons-material/Email';
 import { Link } from 'react-router-dom';
 import IP from "../../../images/IP_Image.png"
+import "./forgotPassword.css"
 
-const ForgetPasswordDetails = ({formData,errors,handleInputChange, handleSubmit }) => {
+const ForgetPasswordDetails = ({ formData, errors, handleInputChange, handleSubmit }) => {
     return (
         <div className="container-fluid px-0 w-100 h-100 overflow-x-hidden position-absolute">
             <div className="row">
                 <div className="col-sm-12 col-md-12 col-lg-6">
-                    <img src={IP} alt='Indian Panorama' width="100%" height="773vh" />
+                    <img src={IP} className='mob_IP' alt='Indian Panorama' width="100%" height="773vh" />
                 </div>
                 <div className={"col-sm-12 col-md-12 col-lg-6 second-box"}>
                     <div className='container'>
@@ -39,13 +40,14 @@ const ForgetPasswordDetails = ({formData,errors,handleInputChange, handleSubmit 
                                             value={formData.email}
                                             onChange={handleInputChange}
                                         />
-                                        {errors.email && (
+                                        {errors.email ? (
                                             <p className="error text-danger">
-                                                {errors.email}
+                                                Please provide valid email address
                                             </p>
-                                        )}
+                                        ) : null}
                                     </div>
                                     <p className='Log_in'><Link to="/" className='back_to_log_in'>Back To Log in</Link></p>
+                                    
                                     <div className='button'>
                                         <button className='login' onClick={handleSubmit}>Send</button>
                                     </div>

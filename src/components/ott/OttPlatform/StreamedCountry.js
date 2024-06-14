@@ -12,22 +12,58 @@ import dayjs from 'dayjs';
 import ApiClient from '../../common/ApiClient';
 import { useEffect } from 'react';
 import DeleteDialog from '../../ip/DeleteDialog';
-const StreamedCountry = () => {
+import { useParams } from 'react-router-dom';
+import styles from "../../ott/OttPlatform/Stream.module.css"
 
+
+import { getRequestGlobal } from "../../../API/global"
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+
+import Button from '@mui/material/Button';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Margin } from '@mui/icons-material';
+
+
+const StreamedCountry = ({ setFormDataMain, setOttPlatformErrors, errors, formDataMain }) => {
+
+    // const [reducerValue, forceUpdate] = useReducer(x => x + 1, 0);
+
+    const { id = null } = useParams();
     const { putRequest, getRequest, deleteRequest } = ApiClient();
     const [errorsForm, setErrorsForm] = useState({});
     const [preData, setPreData] = useState([]);
+    const [countryId, setCountryId] = useState({})
     const [formData, setformData] = React.useState({
-        country_id: 1,
+        // country_id: 1,
+        country_id: 0,
         platform_name: '',
         release_date: null,
-        ott_form_id: '1',
+        ott_form_id: id,
     });
     const loadData = async () => {
-        const preData = await getRequest(`ott/1/streamed-country`);
+        const preData = await getRequest(`ott/${id}/streamed-country`);
         const data = preData.data;
 
-        //  if (data && data.length < 5) setShowAddNewEntry(true)
+        if (data.length > 0) {
+
+            setFormDataMain(prevData => ({
+                ...prevData,
+                is_streamed_country: 1
+            }));
+            setOttPlatformErrors({
+                ...errors,
+                is_streamed_country: null
+            })
+        } else {
+            setFormDataMain(prevData => ({
+                ...prevData,
+                is_streamed_country: null
+            }));
+        }
+
         setPreData(data);
     }
     useEffect(() => {
@@ -35,12 +71,23 @@ const StreamedCountry = () => {
 
     }, []);
 
+    useEffect(() => {
+        getRequestGlobal('country', {})
+            .then((data) => {
+                console.log({ data })
+                setCountryId(data.data)
+            })
+            .catch((error) => {
+            });
+
+    }, []);
+
     const validateForm = () => {
         const newErrors = {};
-        if (!formData.country_id) newErrors.country_id = 'Country is required';
+        if (!formData.country_id) newErrors.country_id = 'Select country name';
         if (!formData.ott_form_id) newErrors.ott_form_id = 'form id  is missing';
-        if (!formData.platform_name) newErrors.platform_name = 'Platform name is required';
-        if (!formData.release_date) newErrors.release_date = 'Release date is required';
+        if (!formData.platform_name) newErrors.platform_name = 'Enter name of the OTT platform';
+        if (!formData.release_date) newErrors.release_date = 'Select release date';
         setErrorsForm(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -70,7 +117,7 @@ const StreamedCountry = () => {
         e.preventDefault();
 
         if (!validateForm()) return;
-        const id = 1;
+
         try {
 
             const response = await putRequest(`ott/${id}/streamed-country`, formData)
@@ -83,9 +130,9 @@ const StreamedCountry = () => {
 
             // Reset form after co-Producer submission
             setformData({
-                episode_number: '',
+                country_id: null,
                 release_date: null,
-                ott_form_id: 1,
+                ott_form_id: id,
             });
             loadData();
             alert('Form has submitted successfully!');
@@ -112,7 +159,7 @@ const StreamedCountry = () => {
     };
     const submitDelete = async (e) => {
         e.preventDefault();
-        const id = 1;
+
         try {
             const response = await deleteRequest(`ott/${id}/streamed-country/${prepareDelete}`, formData)
 
@@ -131,130 +178,191 @@ const StreamedCountry = () => {
 
     return (
         <>
-            {
-                preData.map((item, index) => (
+            {preData && preData.length > 0 ? (
+                <TableContainer component={Paper} style={{ marginTop: '10px' }}>
+                    <Table sx={{ minWidth: 650 }} aria-label="caption table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell align='center'>Name of country</TableCell>
+                                <TableCell align="center">Name of the OTT platform</TableCell>
+                                <TableCell align="center">Release date of its episodes's</TableCell>
+                                <TableCell align="center"></TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {preData.map((row) => (
+                                <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                    <TableCell align="center">
+                                        {/* {row.country_id} */}
+                                        {countryId[row.country_id] || ''}
+                                    </TableCell>
+                                    <TableCell align="center">{row.platform_name}</TableCell>
+                                    <TableCell align="center">{row.release_date}</TableCell>
+                                    <TableCell align="center">
+                                        <Button value={row.id} onClick={handleDeleteOpen} variant="outlined" color="error" startIcon={<DeleteIcon style={{ color: '#d32f2f' }} />}>
+                                            Delete
+                                        </Button>
+                                        <DeleteDialog open={openDeleteConfirm} handleClose={handleDeleteClose} handleDelete={submitDelete} />
+                                    </TableCell>
+                                </TableRow>
+                            ))}
 
-                    <>
-                        <Grid item xs={1} sm={1} md={1} lg={1} className='mt-2'>
-                            Country:
-                        </Grid>
-                        <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                            {item.country_id}
-                        </Grid>
-                        <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                            Platform Name :
-                        </Grid>
-                        <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                            {item.platform_name}
-                        </Grid>
-                        <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                            Release Date:
-                        </Grid>
-                        <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                            {item.release_date}
-                        </Grid>
-                        <Grid item xs={1} sm={1} md={1} lg={1} className='mt-2'>
-                            <button className='btn btn-danger'
-                                // onClick=
-                                // {(event) => submitDelete(item.id, event)}
-                                value={item.id}
-                                onClick={handleDeleteOpen}
-                            >
-                                -
-                            </button>
-                            <DeleteDialog open={openDeleteConfirm} handleClose={handleDeleteClose} handleDelete={submitDelete} />
-
-                        </Grid>
-                    </>
-                ))}
-            <Grid item xs={12} sm={12} md={6} lg={6}>
-                <Box>
-                    <TextField
-                        name="country_id"
-                        label="Name of country"
-                        type="text"
-                        fullWidth
-                        value={formData.country_id}
-                        onChange={handleFormData}
-                    />
-                     {errorsForm.country_id && (
-                            <p className="text-danger">{errorsForm.country_id}</p>
-                        )}
-                </Box>
-            </Grid>
-            <Grid item xs={12} sm={12} md={6} lg={6}>
-                <Box>
-                    <TextField
-                        label="Name of the OTT platform"
-                        type="text"
-                        fullWidth
-                        name="platform_name"
-                        value={formData.platform_name}
-                        onChange={handleFormData}
-                    />
-                     {errorsForm.platform_name && (
-                            <p className="text-danger">{errorsForm.platform_name}</p>
-                        )}
-                </Box>
-               
-            </Grid>
-            <Grid item xs={12} sm={12} md={6} lg={6}>
-                <Box style={{ width: "100%" }}>
-                    <FormControl
-                        sx={{
-                            width: {
-                                xs: '100%', 
-                                sm: '100%', 
-                                md: '100%',
-                                lg: '100%', 
-                            }
-                        }}
-                       >
-                        <LocalizationProvider dateAdapter={AdapterDayjs}  >
-                            <DemoContainer components={['DatePicker']}>
-                                <DatePicker
-                                    label="Release date of its episodes's"
-                                    name="release_date"
-                                    value={formData.release_date}
-                                    onChange={handleReleaseDate}
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            height: {
-                                                xs: '48px', 
-                                                sm: '52px',
-                                                md: '56px', 
-                                                lg: '62px', 
-                                            },
-                                            width: {
-                                                xs: '100%', 
-                                                sm: '100%', 
-                                                md: '640px',
-                                                lg: '640px', 
-                                            },
-                                            borderRadius: {
-                                                xs: '4px', 
-                                                sm: '5px',
-                                                md: '6px', 
-                                                lg: '7px',
-                                            },
-                                        }
-                                    }}
-                                />
-                            </DemoContainer>
-                        </LocalizationProvider>
-                    </FormControl>
-                </Box>
-                {errorsForm.release_date && (
-                            <p className="text-danger">{errorsForm.release_date}</p>
-                        )}
-            </Grid>
-            <Grid item xs={12} sm={12} md={12} lg={12}>
-                <Box className='d-flex align-items-center justify-content-end'>
-                    <Box>
-                        <button className='btn btn-success' onClick={submitForm}>Submit and Add More</button>
-                    </Box>
-                </Box>
-            </Grid>
+                            {/* <TableFooter> */}
+                            <TableRow>
+                                <TableCell align="center" colSpan={4}>
+                                    <Grid container spacing={2} >
+                                        <Grid item xs={3} sm={3} md={3} lg={3}>
+                                            <Box>
+                                                <FormControl fullWidth>
+                                                    <InputLabel id="demo-simple-select-label">Name of country</InputLabel>
+                                                    <Select
+                                                        labelId="demo-simple-select-label"
+                                                        id="demo-simple-select"
+                                                        onChange={handleFormData}
+                                                        name="country_id"
+                                                        label="Name of country"
+                                                        value={formData.country_id || ''}
+                                                    >
+                                                        <MenuItem key="0" value="">Name of country</MenuItem>
+                                                        {Object.entries(countryId).map(([key, value]) => (
+                                                            <MenuItem key={key} value={key}>
+                                                                {value}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </Select>
+                                                </FormControl>
+                                                {errorsForm.country_id && (
+                                                    <p className="text-danger">{errorsForm.country_id}</p>
+                                                )}
+                                            </Box>
+                                        </Grid>
+                                        <Grid item xs={3} sm={3} md={3} lg={3}>
+                                            <Box>
+                                                <TextField
+                                                    label="Name of the OTT platform"
+                                                    type="text"
+                                                    fullWidth
+                                                    variant="outlined"
+                                                    name="platform_name"
+                                                    value={formData.platform_name}
+                                                    onChange={handleFormData}
+                                                />
+                                                {errorsForm.platform_name && (
+                                                    <p className="text-danger">{errorsForm.platform_name}</p>
+                                                )}
+                                            </Box>
+                                        </Grid>
+                                        <Grid item xs={3} sm={3} md={3} lg={3}>
+                                            <Box style={{ width: "100%" }}>
+                                                <FormControl>
+                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                        <DatePicker
+                                                            label="Release date of episodes's"
+                                                            name="release_date"
+                                                            value={formData.release_date}
+                                                            onChange={handleReleaseDate}
+                                                            minDate={dayjs('2023-08-01')}
+                                                            maxDate={dayjs('2024-07-31')}
+                                                        />
+                                                    </LocalizationProvider>
+                                                </FormControl>
+                                                {errorsForm.release_date && (
+                                                    <p className="text-danger">{errorsForm.release_date}</p>
+                                                )}
+                                            </Box>
+                                        </Grid>
+                                        <Grid item xs={3} sm={3} md={3} lg={3}>
+                                            <Box>
+                                                <Button variant="contained" color="success" onClick={submitForm}>
+                                                    Submit and Add More
+                                                </Button>
+                                                {/* <Button className='btn btn-success' onClick={submitForm}>Submit and Add More</Button> */}
+                                                {errorsForm.is_streamed_country && (
+                                                    <p className="text-danger error-handling">{errorsForm.is_streamed_country}</p>
+                                                )}
+                                            </Box>
+                                        </Grid>
+                                    </Grid>
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                        {/* </TableFooter> */}
+                    </Table>
+                </TableContainer>
+            ) : (
+                <Grid container spacing={2}>
+                    <Grid item xs={3} sm={3} md={3} lg={3}>
+                        <Box>
+                            <FormControl fullWidth>
+                                <InputLabel id="demo-simple-select-label">Name of country</InputLabel>
+                                <Select
+                                    labelId="demo-simple-select-label"
+                                    id="demo-simple-select"
+                                    onChange={handleFormData}
+                                    name="country_id"
+                                    label="Name of country"
+                                    value={formData.country_id || ''}
+                                >
+                                    <MenuItem key="0" value="">Name of country</MenuItem>
+                                    {Object.entries(countryId).map(([key, value]) => (
+                                        <MenuItem key={key} value={key}>
+                                            {value}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            {errorsForm.country_id && (
+                                <p className="text-danger">{errorsForm.country_id}</p>
+                            )}
+                        </Box>
+                    </Grid>
+                    <Grid item xs={3} sm={3} md={3} lg={3}>
+                        <Box>
+                            <TextField
+                                label="Name of the OTT platform"
+                                type="text"
+                                fullWidth
+                                variant="outlined"
+                                name="platform_name"
+                                value={formData.platform_name}
+                                onChange={handleFormData}
+                            />
+                            {errorsForm.platform_name && (
+                                <p className="text-danger">{errorsForm.platform_name}</p>
+                            )}
+                        </Box>
+                    </Grid>
+                    <Grid item xs={3} sm={3} md={3} lg={3}>
+                        <Box style={{ width: "100%" }}>
+                            <FormControl>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DatePicker
+                                        label="Release date of episodes's"
+                                        name="release_date"
+                                        value={formData.release_date}
+                                        onChange={handleReleaseDate}
+                                        minDate={dayjs('2023-08-01')}
+                                        maxDate={dayjs('2024-07-31')}
+                                    />
+                                </LocalizationProvider>
+                            </FormControl>
+                            {errorsForm.release_date && (
+                                <p className="text-danger">{errorsForm.release_date}</p>
+                            )}
+                        </Box>
+                    </Grid>
+                    <Grid item xs={3} sm={3} md={3} lg={3}>
+                        <Box>
+                            <Button variant="contained" color="success" onClick={submitForm}>
+                                Submit and Add More
+                            </Button>
+                            {errorsForm.is_streamed_country && (
+                                <p className="text-danger error-handling">{errorsForm.is_streamed_country}</p>
+                            )}
+                        </Box>
+                    </Grid>
+                </Grid>
+            )}
         </>
     )
 }

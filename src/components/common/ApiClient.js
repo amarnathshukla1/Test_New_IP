@@ -102,10 +102,13 @@ const ApiClient = () => {
     };
     const postRequest = async (endpoint, options = {}) => {
 
-
+        const formData = new FormData();
+        for (const key in options) {
+            formData.append(key, options[key]);
+        }
         try {
             const token = localStorage.getItem('token');
-            // console.log(data);
+            console.log({ token });
 
             const response = await fetch(`${IP_URL}${endpoint}`, {
                 method: "post",
@@ -113,6 +116,7 @@ const ApiClient = () => {
                     // "Content-Type": "application/json",
                     Authorization: 'Bearer ' + token
                 },
+                body: formData
             });
             // console.log(IP_URL, "url")
 
@@ -165,7 +169,7 @@ const ApiClient = () => {
         try {
             const token = localStorage.getItem('token');
             const response = await fetch(`${IP_URL}${endpoint}`, {
-                method: "PATCH",
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: 'Bearer ' + token

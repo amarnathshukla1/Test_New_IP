@@ -34,7 +34,7 @@ const ChangedPasswordDetails = ( {changedPassword, errors, handlePasswordChange,
      <div className="container-fluid px-0 w-100 overflow-x-hidden position-absolute">
             <div className="row">
                 <div className="col-sm-12 col-md-12 col-lg-6">
-                    <img src={IP} alt='Indian Panorama' width="100%" height="773vh" />
+                    <img src={IP} className='mob-IP' alt='Indian Panorama' width="100%" height="773vh" />
                 </div>
                 <div className={"col-sm-12 col-md-12 col-lg-6 second-box"}>
                     <div className='container'>

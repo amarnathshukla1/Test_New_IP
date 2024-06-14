@@ -12,21 +12,46 @@ import dayjs from 'dayjs';
 import ApiClient from '../../common/ApiClient';
 import { useEffect } from 'react';
 import DeleteDialog from '../../ip/DeleteDialog';
-const Broadcasted = () => {
+import { useParams } from 'react-router-dom';
+import styles from "../../ott/OttPlatform/Stream.module.css"
 
+
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import Button from '@mui/material/Button';
+import DeleteIcon from '@mui/icons-material/Delete';
+
+const Broadcasted = ({ setFormDataMain, setOttPlatformErrors, errors, formDataMain }) => {
+
+    const { id = null } = useParams();
     const { putRequest, getRequest, deleteRequest } = ApiClient();
     const [errorsForm, setErrorsForm] = useState({});
     const [preData, setPreData] = useState([]);
     const [formData, setformData] = React.useState({
-       
+
         stream_date: null,
         platform_name: "",
-        ott_form_id: '1',
+        ott_form_id: id,
     });
     const loadData = async () => {
-        const preData = await getRequest(`ott/1/broardcast`);
+        const preData = await getRequest(`ott/${id}/broardcast`);
         const data = preData.data;
+        if (data.length > 0) {
 
+            setFormDataMain(prevData => ({
+                ...prevData,
+                is_broadcasted_added: 1
+            }));
+            setOttPlatformErrors({
+                ...errors,
+                is_broadcasted_added: null
+            })
+        } else {
+
+            setFormDataMain(prevData => ({
+                ...prevData,
+                is_broadcasted_added: null
+            }));
+        }
         //  if (data && data.length < 5) setShowAddNewEntry(true)
         setPreData(data);
     }
@@ -38,8 +63,8 @@ const Broadcasted = () => {
     const validateForm = () => {
         const newErrors = {};
         if (!formData.ott_form_id) newErrors.ott_form_id = 'form id  is missing';
-        if (!formData.platform_name) newErrors.platform_name = 'Platform Name is required';
-        if (!formData.stream_date) newErrors.stream_date = 'Date of streaming is required';
+        if (!formData.platform_name) newErrors.platform_name = 'Enter platform name';
+        if (!formData.stream_date) newErrors.stream_date = 'Enter date of streaming';
         setErrorsForm(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -69,7 +94,7 @@ const Broadcasted = () => {
         e.preventDefault();
 
         if (!validateForm()) return;
-        const id = 1;
+
         try {
 
             const response = await putRequest(`ott/${id}/broardcast`, formData)
@@ -84,7 +109,7 @@ const Broadcasted = () => {
             setformData({
                 episode_number: '',
                 release_date: null,
-                ott_form_id: 1,
+                ott_form_id: id,
             });
             loadData();
             alert('Form has submitted successfully!');
@@ -111,7 +136,7 @@ const Broadcasted = () => {
     };
     const submitDelete = async (e) => {
         e.preventDefault();
-        const id = 1;
+
         try {
             const response = await deleteRequest(`ott/${id}/broardcast/${prepareDelete}`, formData)
 
@@ -130,199 +155,140 @@ const Broadcasted = () => {
 
     return (
         <>
-            {
-                preData.map((item, index) => (
+            {preData && preData.length > 0 ? (
+                <TableContainer component={Paper} style={{ marginTop: '10px' }}>
+                    <Table sx={{ minWidth: 650 }} aria-label="caption table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell align='center'>Date of the Streaming</TableCell>
+                                <TableCell align="center">Name of the platform</TableCell>
+                                <TableCell align="center"></TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {preData.map((row) => (
+                                <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                    <TableCell align="center">{row.stream_date}</TableCell>
+                                    <TableCell align="center">{row.platform_name}</TableCell>
+                                    <TableCell align="center">
+                                        <Button value={row.id} onClick={handleDeleteOpen} variant="outlined" color="error" startIcon={<DeleteIcon style={{ color: '#d32f2f' }} />}>
+                                            Delete
+                                        </Button>
+                                        <DeleteDialog open={openDeleteConfirm} handleClose={handleDeleteClose} handleDelete={submitDelete} />
+                                    </TableCell>
+                                </TableRow>
+                            ))}
 
-                    <>
-                        <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                            Date of streaming:
-                        </Grid>
-                        <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                            {item.stream_date}
-                        </Grid>
-                        <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                            Nameof the platform :
-                        </Grid>
-                        <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                            {item.platform_name}
-                        </Grid>
-                        <Grid item xs={4} sm={4} md={4} lg={4} className='mt-2'>
-                            <button className='btn btn-danger'
-                                // onClick=
-                                // {(event) => submitDelete(item.id, event)}
-                                value={item.id}
-                                onClick={handleDeleteOpen}
-                            >
-                                -
-                            </button>
-                            <DeleteDialog open={openDeleteConfirm} handleClose={handleDeleteClose} handleDelete={submitDelete} />
+                            <TableRow>
+                                <TableCell align="center" colSpan={4}>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={3} sm={3} md={3} lg={4}>
+                                            <Box style={{ width: "100%" }}>
+                                                <FormControl>
+                                                    <LocalizationProvider dateAdapter={AdapterDayjs}  >
+                                                        <DemoContainer components={['DatePicker']}>
+                                                            <DatePicker
+                                                                label="Date of the Streaming"
+                                                                name="stream_date"
+                                                                value={formData.stream_date}
+                                                                onChange={handleReleaseDate}
+                                                                minDate={dayjs('2023-08-01')}
+                                                                maxDate={dayjs('2024-07-31')}
+                                                            />
+                                                        </DemoContainer>
+                                                    </LocalizationProvider>
+                                                </FormControl>
+                                                {errorsForm.stream_date && (
+                                                    <p className="text-danger">{errorsForm.stream_date}</p>
+                                                )}
+                                            </Box>
+                                        </Grid>
 
-                        </Grid>
-                    </>
-                ))}
-            {/* <Grid item xs={12} sm={12} md={6} lg={6}>
-                <Box>
-                    <TextField
-                        name="country_id"
-                        label="Name of country"
-                        type="text"
-                        fullWidth
-                        onChange={handleFormData}
-                    />
-                </Box>
-            </Grid> */}
+                                        <Grid item xs={3} sm={3} md={3} lg={4}>
+                                            <Box>
+                                                <TextField
+                                                    label="Name of the platform"
+                                                    type="text"
+                                                    fullWidth
+                                                    name="platform_name"
+                                                    // value={formData.platform_name}
+                                                    onChange={handleFormData}
+                                                />
+                                                {errorsForm.platform_name && (
+                                                    <p className="text-danger">{errorsForm.platform_name}</p>
+                                                )}
+                                            </Box>
+                                        </Grid>
 
-            {/* <Grid item xs={12} sm={12} md={6} lg={6}>
-                <Box
-                    sx={{
-                        width: '100%',
-                    }}
-                >
-                    <FormControl
-                        sx={{
-                            width: {
-                                xs: '100%',
-                                sm: '100%',
-                                md: '100%',
-                                lg: '100%',
-                            }
-                        }}
-                    >
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DatePicker
-                                label="Date of Streaming"
-                                name="Date of Streaming"
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        height: {
-                                            xs: '48px',
-                                            sm: '52px',
-                                            md: '56px',
-                                            lg: '62px',
-                                        },
-                                        borderRadius: {
-                                            xs: '4px',
-                                            sm: '5px',
-                                            md: '6px',
-                                            lg: '7px',
-                                        },
-                                    }
-                                }}
+                                        <Grid item xs={3} sm={3} md={3} lg={4}>
+                                            <Box>
+                                                <Button variant="contained" color="success" onClick={submitForm}>
+                                                    Submit and Add More
+                                                </Button>
+                                                {errors.is_broadcasted_added && (
+                                                    <p className="text-danger error-handling">{errors.is_broadcasted_added}</p>
+                                                )}
+                                            </Box>
+                                        </Grid>
+                                    </Grid >
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                        {/* </TableFooter> */}
+                    </Table>
+                </TableContainer>
+            ) : (
+                <Grid container spacing={2}>
+                    <Grid item xs={3} sm={3} md={3} lg={3}>
+                        <Box style={{ width: "100%" }}>
+                            <FormControl>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}  >
+                                    <DemoContainer components={['DatePicker']}>
+                                        <DatePicker
+                                            label="Date of the Streaming"
+                                            name="stream_date"
+                                            value={formData.stream_date}
+                                            onChange={handleReleaseDate}
+                                            minDate={dayjs('2023-08-01')}
+                                            maxDate={dayjs('2024-07-31')}
+                                        />
+                                    </DemoContainer>
+                                </LocalizationProvider>
+                            </FormControl>
+                            {errorsForm.stream_date && (
+                                <p className="text-danger">{errorsForm.stream_date}</p>
+                            )}
+                        </Box>
+                    </Grid>
+
+                    <Grid item xs={3} sm={3} md={3} lg={3}>
+                        <Box>
+                            <TextField
+                                label="Name of the platform"
+                                type="text"
+                                fullWidth
+                                name="platform_name"
+                                // value={formData.platform_name}
+                                onChange={handleFormData}
                             />
-                        </LocalizationProvider>
-                    </FormControl>
-                </Box>
+                            {errorsForm.platform_name && (
+                                <p className="text-danger">{errorsForm.platform_name}</p>
+                            )}
+                        </Box>
+                    </Grid>
 
-            </Grid> */}
-
-            <Grid className='container'>
-                
-            </Grid>
-
-            <Grid item xs={12} sm={12} md={6} lg={6}>
-                <Box style={{ width: "100%" }}>
-                    <FormControl
-                       sx={{
-                        width: {
-                            xs: '100%', 
-                            sm: '100%', 
-                            md: '100%',
-                            lg: '100%', 
-                        }
-                    }}>
-                        <LocalizationProvider dateAdapter={AdapterDayjs}  >
-                            <DemoContainer components={['DatePicker']}>
-                                <DatePicker
-                                   label="Date of the Streaming"
-                                   name="stream_date"
-                                    value={formData.stream_date}
-                                    onChange={handleReleaseDate}
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            height: {
-                                                xs: '48px', 
-                                                sm: '52px',
-                                                md: '56px', 
-                                                lg: '62px', 
-                                            },
-                                            width: {
-                                                xs: '100%', 
-                                                sm: '100%', 
-                                                md: '640px',
-                                                lg: '640px', 
-                                            },
-                                            borderRadius: {
-                                                xs: '4px', 
-                                                sm: '5px',
-                                                md: '6px', 
-                                                lg: '7px',
-                                            },
-                                        }
-                                    }}
-                                />
-                            </DemoContainer>
-                        </LocalizationProvider>
-                    </FormControl>
-                    {errorsForm.stream_date && (
-                            <p className="text-danger">{errorsForm.stream_date}</p>
-                        )}
-                </Box>
-            </Grid>
-
-            <Grid item xs={12} sm={12} md={6} lg={6} className='mt-2'>
-                <Box>
-                    <TextField
-                        label="Name of the platform"
-                        type="text"
-                        fullWidth
-                        name="platform_name"
-                        value={formData.platform_name}
-                        onChange={handleFormData}
-                    />
-                     {errorsForm.platform_name && (
-                            <p className="text-danger">{errorsForm.platform_name}</p>
-                        )}
-                </Box>
-            </Grid>
-            {/* <Grid item xs={12} sm={12} md={6} lg={6}>
-                <Box style={{ width: "100%" }}>
-                    <FormControl
-                        sx={{
-                            width: "100%",
-
-                            borderRadius: "5px",
-                        }}>
-                        <LocalizationProvider dateAdapter={AdapterDayjs}  >
-                            <DemoContainer components={['DatePicker']}>
-                                <DatePicker
-                                    label="Release date of its episodes's"
-                                    name="release_date_of_the_season"
-                                    value={formData.release_date}
-                                    onChange={handleReleaseDate}
-                                    // InputProps={{
-                                    // }}
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            width: '100% !important',
-                                            height: "62px",
-                                            borderRadius: "5px",
-                                        },
-                                        '& .MuiInputAdornment-root': {
-                                        },
-                                    }}
-                                />
-                            </DemoContainer>
-                        </LocalizationProvider>
-                    </FormControl>
-                </Box>
-            </Grid> */}
-            <Grid item xs={12} sm={12} md={12} lg={12}>
-                <Box className='d-flex align-items-center justify-content-end'>
-                    <Box>
-                        <button className='btn btn-success' onClick={submitForm}>Submit and Add More</button>
-                    </Box>
-                </Box>
-            </Grid>
+                    <Grid item xs={3} sm={3} md={3} lg={3}>
+                        <Box>
+                            <Button variant="contained" color="success" onClick={submitForm}>
+                                Submit and Add More
+                            </Button>
+                            {errors.is_broadcasted_added && (
+                                <p className="text-danger error-handling">{errors.is_broadcasted_added}</p>
+                            )}
+                        </Box>
+                    </Grid>
+                </Grid>
+            )}
         </>
     )
 }

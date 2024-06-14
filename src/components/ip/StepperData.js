@@ -4,7 +4,9 @@ import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepButton from '@mui/material/StepButton';
 import Button from '@mui/material/Button';
-import IP_Page from "../../images/IP_Page.png"
+import IFFFI_LOGO from "../../images/IFFFI_LOGO.png"
+import ashok_logo from "../../images/ashok-logo.png"
+import NFDC_logo from "../../images/NFDC-Logo.png"
 import FilmDetails from './FilmDetails/FilmDetails';
 import ProducerDetails from './ProducerDetails/ProducerDetails';
 import DirectorDetails from './DirectorDetails/DirectorDetails';
@@ -27,7 +29,9 @@ import Typography from '@mui/material/Typography';
 import Success from "../../images/Success.png"
 // import AlertMessage from '../../AlertMessage';
 import AlertMessage from '../AlertMessage';
-
+import { useMediaQuery, useTheme } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import { Link }  from 'react-router';
 
 const steps = [
     "Film's Details",
@@ -81,6 +85,7 @@ const ModalComponent = ({ show, handleClose }) => {
 
 
 export default function HorizontalNonLinearStepper() {
+    const [loading, setLoading] = useState(false);
     const { id = null, ip_step = 1 } = useParams();
 
     const dashboardnavi = useNavigate();
@@ -209,7 +214,10 @@ export default function HorizontalNonLinearStepper() {
                 setFilmErrors(errors);
                 return;
             }
-
+            setLoading(true);
+            // setTimeout(() => {
+            //     setLoading(false);
+            // }, 7000);
             try {
 
                 if (id) {
@@ -226,6 +234,12 @@ export default function HorizontalNonLinearStepper() {
 
             } catch (error) {
                 console.error("Error:", error);
+            } finally {
+                // setTimeout(() => {
+                //     setLoading(false);
+                // }, 700000);
+                setLoading(false)
+                
             }
             // formData.step=1;
             // await postRequest("ip_applcation_form",formData);
@@ -254,6 +268,7 @@ export default function HorizontalNonLinearStepper() {
                 last_id: id
             };
             console.log({ updatedFormData });
+            setLoading(true)
             try {
                 const producer_data_check = await postRequest("ip_applcation_form", updatedFormData);
 
@@ -267,6 +282,8 @@ export default function HorizontalNonLinearStepper() {
                 }
             } catch (error) {
                 console.error("Error:", error);
+            } finally {
+                setLoading(false); // Set loading to false when the API call finishes
             }
         }
 
@@ -289,6 +306,7 @@ export default function HorizontalNonLinearStepper() {
                 step: 3,
                 last_id: id
             };
+            setLoading(true)
             try {
                 const producer_data_check = await postRequest("ip_applcation_form", updatedFormData);
                 console.log(producer_data_check);
@@ -303,6 +321,8 @@ export default function HorizontalNonLinearStepper() {
                 }
             } catch (error) {
                 console.error("Error:", error);
+            } finally {
+                setLoading(false); // Set loading to false when the API call finishes
             }
         }
 
@@ -329,6 +349,7 @@ export default function HorizontalNonLinearStepper() {
             // } catch (error) {
             //     console.error("Error:", error);
             // }
+            setLoading(true)
             try {
                 const producer_data_check = await postRequest("ip_applcation_form", updatedFormData);
 
@@ -344,6 +365,8 @@ export default function HorizontalNonLinearStepper() {
                 }
             } catch (error) {
                 console.error("Error:", error);
+            } finally {
+                setLoading(false); // Set loading to false when the API call finishes
             }
         }
 
@@ -371,6 +394,7 @@ export default function HorizontalNonLinearStepper() {
             // } catch (error) {
             //     console.error("Error:", error);
             // } convertDate
+            setLoading(true)
             try {
                 updatedFormData.date_of_cbfc_certificate = convertDate(updatedFormData.date_of_cbfc_certificate);
                 updatedFormData.date_of_completion_production = convertDate(updatedFormData.date_of_completion_production);
@@ -389,6 +413,8 @@ export default function HorizontalNonLinearStepper() {
                 }
             } catch (error) {
                 console.error("Error:", error);
+            } finally {
+                setLoading(false); // Set loading to false when the API call finishes
             }
         }
 
@@ -414,7 +440,8 @@ export default function HorizontalNonLinearStepper() {
             //     await postRequest("ip_applcation_form", updatedFormData);
             // } catch (error) {
             //     console.error("Error:", error);
-            // } 
+            // }
+            setLoading(true)
             try {
 
                 updatedFormData.date_of_festival = convertDate(updatedFormData.date_of_festival);
@@ -435,6 +462,8 @@ export default function HorizontalNonLinearStepper() {
                 }
             } catch (error) {
                 console.error("Error:", error);
+            } finally {
+                setLoading(false); // Set loading to false when the API call finishes
             }
         }
 
@@ -461,6 +490,7 @@ export default function HorizontalNonLinearStepper() {
             // } catch (error) {
             //     console.error("Error:", error);
             // }
+            setLoading(true)
 
             try {
                 const producer_data_check = await postRequest("ip_applcation_form", updatedFormData);
@@ -478,6 +508,8 @@ export default function HorizontalNonLinearStepper() {
                 }
             } catch (error) {
                 console.error("Error:", error);
+            } finally {
+                setLoading(false); // Set loading to false when the API call finishes
             }
         }
 
@@ -488,8 +520,7 @@ export default function HorizontalNonLinearStepper() {
                 step: 8,
                 last_id: id
             };
-
-
+            setLoading(true)
             try {
                 const producer_data_check = await postRequest("ip_applcation_form", updatedFormData);
 
@@ -500,22 +531,22 @@ export default function HorizontalNonLinearStepper() {
                 }
             } catch (error) {
                 console.error("Error:", error);
+            } finally {
+                setLoading(false); // Set loading to false when the API call finishes
             }
-        }
-        if (activeStep === 8) {
-
-
         }
         // setCompleted(newCompleted);
 
-        // Final Step make API Call
         if (activeStep === steps.length - 1) {
-            // Final step, make the API call
+            // Final Step
             await submitFormData();
         } else {
-            ///  x
+            // Check if the next step is not completed before proceeding
+            if (!isStepCompleted(activeStep + 1)) {
+                // Proceed to the next step
+                handleNext();
+            }
         }
-        //handleNext();
 
         loadpreData();
 
@@ -718,6 +749,7 @@ export default function HorizontalNonLinearStepper() {
             errorsProducer.right_holder_email = "Email is not valid.";
         }
 
+
         if ((!right_holder_name && (whether_indian_foreign_right_holder_same === 0 || whether_indian_foreign_right_holder_same === '0'))) {
             errorsProducer.right_holder_name = "Enter your name"
         }
@@ -741,11 +773,13 @@ export default function HorizontalNonLinearStepper() {
             errorsProducer.producer_is = "Select the Producer Type";
         }
 
-        if (!(firm_is_owned_by_individual == 1 || firm_is_owned_by_individual == 0 || firm_is_owned_by_individual == '0')) {
-            errorsProducer.firm_is_owned_by_individual = "Select the Individual Producer Type";
+        if (producer_is == 1 && (firm_is_owned_by_individual === 0 || firm_is_owned_by_individual === '0')) {
+            errorsProducer.firm_is_owned_by_individual = "Select the Individual Producer type";
         }
+
+        
         if (!name_of_firm) {
-            errorsProducer.name_of_firm = (producer_is == 2) ? "Enter production house name" : (
+            errorsProducer.name_of_firm = (producer_is === 2) ? "Enter production house name" : (
                 (producer_is == 1 && (firm_is_owned_by_individual == 0 || firm_is_owned_by_individual == '0')) ?
                     "Enter producer name"
                     :
@@ -997,7 +1031,7 @@ export default function HorizontalNonLinearStepper() {
         }
 
         dataDate = convertDate(date_of_release_date);
-        if (!date_of_release_date || dataDate == "NaN-NaN-NaN" && film_screened_outside_india == 1){
+        if (!date_of_release_date || dataDate == "NaN-NaN-NaN" && film_screened_outside_india == 1) {
 
             errorsOther.date_of_release_date = "Date of release date is required";
         }
@@ -1060,12 +1094,16 @@ export default function HorizontalNonLinearStepper() {
     };
 
     const handleNext = () => {
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    };
-
-    const handleBack = () => {
-        setActiveStep((prevActiveStep) => prevActiveStep - 1);
-    };
+        if (activeStep < steps.length - 1) {
+          setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        }
+      };
+   
+      const handleBack = () => {
+        if (activeStep > 0) {
+          setActiveStep((prevActiveStep) => prevActiveStep - 1);
+        }
+      };
 
     const isStepCompleted = (step) => {
         return completed[step];
@@ -1139,9 +1177,9 @@ export default function HorizontalNonLinearStepper() {
     useEffect(() => {
         setAlertData({
             heading: (<>
-                
-                    <h5>Note</h5>
-              
+
+                <h5>Note</h5>
+
             </>),
             content:
                 (
@@ -1178,8 +1216,12 @@ export default function HorizontalNonLinearStepper() {
         setOpen((id) ? false : true);
 
     }, []);
-
-
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const allStepsCompleted = () => {
+        return Object.keys(completed).length === steps.length;
+      };
+      
 
     return (
 
@@ -1188,16 +1230,37 @@ export default function HorizontalNonLinearStepper() {
 
             <AlertMessage handleClickOpen={handleClickOpen} setOpen={setOpen} open={open} handleClose={handleClose} data={alertData} />
 
+            {loading && (
+                <Box display="flex" justifyContent="center" alignItems="center" 
+                    width="100%" height="100%" position="absolute"
+                    // bgcolor="rgba(99, 35, 64, 0.5)"
+                    bgcolor="rgb(211, 211, 211)"
+                >
+                    <CircularProgress />
+                </Box>
+            )}
+
+         
+
             <Box className="steppper">
-                <div className='container-fluid'>
-                    <div className='row'>
-                        <div className='col-sm-12 col-md-12 col-lg-12'>
-                            <img src={IP_Page} alt="IP" width="100%" height="130px" />
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <h1 className='text-center mt-4'>INDIAN PANOROMA FORM - I</h1>
+          <div className='container'>
+      <div className='row justify-content-center align-items-center mt-2 mb-2'>
+        <div className='col-4 col-md-3 col-lg-4 col-xl-4'>
+          <img src={IFFFI_LOGO} alt="IP" className='img-fluid' />
+        </div>
+        <div className='col-4 col-md-3 col-lg-4 col-xl-4'>
+          <img src={ashok_logo} alt="IP" className='img-fluid' />
+        </div>
+        <div className='col-4 col-md-3 col-lg-4 col-xl-4'>
+          <img src={NFDC_logo} alt="IP" className='img-fluid' />
+        </div>
+      </div>
+    </div>
+                <div className='sec_head'>
+                <Button variant="contained" href="/dashboard" className="btn text-uppercase">Dashboard</Button>
+                    <h1 className='mt-4 mb-4'>INDIAN PANOROMA FORM - I</h1>
+                    
+                <Button variant="contained" href="/logout" className="btn text-uppercase">Logout</Button>
                 </div>
                 {/* <Stepper nonLinear activeStep={activeStep} connector={<hr className='connector-line' />}>
                 {steps.map((label, index) => (
@@ -1209,7 +1272,7 @@ export default function HorizontalNonLinearStepper() {
                     </Step>
                 ))}
             </Stepper> */}
-                <Stepper activeStep={activeStep} alternativeLabel className='container'
+                {/* <Stepper activeStep={activeStep} alternativeLabel className='container'
                     sx={{
                         width: { xs: '100%', sm: '100%', md: '100%', lg: '100%' },
                         display: { xs: 'flex', sm: 'flex', md: 'flex', lg: 'flex' },
@@ -1224,30 +1287,71 @@ export default function HorizontalNonLinearStepper() {
                             </StepButton>
                         </Step>
                     ))}
+                </Stepper> */}
+                <Stepper
+                    activeStep={activeStep}
+                    orientation={isMobile ? 'vertical' : 'horizontal'}
+                    alternativeLabel={!isMobile}
+                    className='container'
+
+                    sx={{
+                        width: '100%',
+                        display: 'flex',
+                        flexDirection: isMobile ? 'column' : 'row',
+                        alignItems: isMobile ? 'stretch' : 'center',
+                        justifyContent: 'center',
+                        '& .MuiStep-root': {
+                            width: isMobile ? '100%' : 'auto',
+                        },
+                        '& .MuiStepLabel-label': {
+                            whiteSpace: isMobile ? 'normal' : 'nowrap',
+                            textAlign: isMobile ? 'center' : 'inherit',
+                        },
+                    }}
+                >
+                    {steps.map((label, index) => (
+                        <Step key={label} completed={isStepCompleted(index)}>
+                            <StepButton onClick={handleStep(index)}>
+                                <StepLabel>{label}</StepLabel>
+                            </StepButton>
+                        </Step>
+                    ))}
                 </Stepper>
                 <div className='container mt-5'>
-                    {renderStepContent(activeStep)}
-                    <div className='row mt-4'>
-                        <div className='col-lg-12 text-end'>
-                            <div className='d-flex justify-content-between'>
-                                <Button
-                                    disabled={activeStep === 0}
-                                    onClick={handleBack}
-                                >
-                                    Back
-                                </Button>
-                                {activeStep !== steps.length - 1 && (
-                                    <Button onClick={handleComplete} style={{ backgroundColor: isStepCompleted(activeStep) ? "#4CAF50" : "#632340", color: "#fff" }} >
-                                        {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-                                    </Button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  {renderStepContent(activeStep)}
+  <div className='row mt-4'>
+    <div className='col-lg-12 text-end'>
+      <div className='d-flex justify-content-between'>
+        <Button
+          disabled={activeStep === 0}
+          onClick={handleBack}
+        >
+          Back
+        </Button>
+        {(activeStep !== steps.length - 2 && !isStepCompleted(activeStep + 1)) && (
+          <Button
+            onClick={handleComplete}
+            style={{ backgroundColor: "#4CAF50", color: "#fff" }}
+          >
+            Next
+          </Button>
+        )}
+        {activeStep === steps.length - 1 && isStepCompleted(activeStep) && (
+          <Button
+            onClick={handleComplete}
+            style={{ backgroundColor: "#4CAF50", color: "#fff" }}
+          >
+            Finish
+          </Button>
+        )}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
             </Box>
-
-
         </>
 
     );

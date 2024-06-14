@@ -433,6 +433,7 @@ const FilmDetails = ({ formData, setFormData, errors, setFilmErrors }) => {
                   name="language_id"
                   displayEmpty
                   value={formData.language_id || ''}
+                  // value={formData.language_id}
                   onChange={handleChange}
                   inputProps={{ "aria-label": "Language of the Film" }}
                 >

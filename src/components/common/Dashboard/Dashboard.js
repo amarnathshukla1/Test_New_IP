@@ -1,103 +1,119 @@
-import React, { useEffect, useState } from 'react'
-import "../../../assets/style/style.css"
+// Import necessary modules and components from React and Material-UI
+import React, { useState } from 'react';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
+import "../Dashboard/dashboard.css";
+import CardIp from './CardIp';
+import CardOtt from './CardOtt'
+import Button from '@mui/material/Button';
+import NavBar from './NavBar';
+import LeftBar from './LeftBar';
 
-import GOLDEN_LOGO_IB from "../../../assets/images/GOLDEN_LOGO_IB.svg";
-import NFDC_LOGO_IP from "../../../assets/images/NFDC-Logo-ip.svg";
-import IndianPanorama from "../../../assets/images/Indian-Panorama-text.svg";
-import IFFFI_LOGO from "../../../assets/images/IFFFI_LOGO.svg";
-// import { Header } from '../DashboadPartial/Header';
-import Header from "../DashboadPartial/Header"
-import { getRequest } from '../../../API/IP';
-import ApiClient from '../ApiClient';
+const Container = styled(Box)({
+    // Full height of the viewport
+    height: '100vh',
+});
+// Styled component for the TabPanel container
+const TabPanelContainer = styled(Box)({
+    // Padding inside the TabPanel
+    padding: '16px',
+});
 
 
+// TabPanel component to handle the content of each tab
+function TabPanel(props) {
+    const { children, value, index, ...other } = props;
 
-const Dashboard = () => {
-    const { getRequest } = ApiClient();
-    // console.log(getRequesta())
-    const [preData, setPredata] = useState([]);
-
-    const [showAddNewEntry, setShowAddNewEntry] = useState(false);
-    const loadpreData = async () => {
-
-
-    }
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const preData = await getRequest('list');
-                const data = preData.data;
-                if (data && data.length < 5) setShowAddNewEntry(true)
-                setPredata(data);
-            } catch (error) {
-                console.error('Fetch error:', error);
-            }
-        };
-        fetchData();
-    }, [getRequest]);
-
+    // Log the received props for debugging
+    console.log("Received props in TabPanel:", props);
 
     return (
-        <>
-
-            <main className="bg-IP-dashboard">
-                <Header showAddNewEntry={showAddNewEntry} />
-                <main className="change-block container">
-                    {preData.length == 0 ? (
-                        <div className="new-entry d-flex justify-content-center align-items-center">
-                            <span className="d-block text-center">
-                                <p className="text-white">You haven't added any entries yet. To get started, simply click on</p>
-                                <a href="/ip" className="btn btn-newEntry">Add New Entry</a>
-                            </span>
-                        </div>
-                    ) : (
-                        <div className="row card-block">
-                            {preData.map((item, index) => (
-
-                                <div className="col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12 mb-4">
-                                    <div className="glassmorphisam-card">
-                                        <div className="card_content">
-                                            <div className="card_title d-flex">
-                                                {/* <img src="./assets/images/letter-a.svg" alt="" /> */}
-                                                <h4 className="ps-3">{item.english_translation_of_film}</h4>
-                                            </div>
-                                            <div className="card_body">
-                                                <div className="d-flex align-items-center justify-content-between">
-                                                    <p className="mb-0">Type Of Film</p>
-                                                    <h5 className="mb-0">{(item.category == 1) ? 'Featured' : 'Non-Featured'}</h5>
-                                                </div>
-                                                <div className="d-flex align-items-center justify-content-between mt-2">
-                                                    <p className="mb-0">Language of Film</p>
-                                                    <h5 className="mb-0">{(item.language_id == 1) ? 'English' : 'Non-English'}</h5>
-                                                </div>
-                                            </div>
-                                            <div className="card_footer">
-                                                <div>
-                                                <button  className="btn text-white"><a href={`ip/${item.id}/${item.active_step}`} className="btn btn_view">View</a></button>
-                                                <button className='btn  btn-view' style={{backgroundColor:"#ffcc00", color:"white"}}>Print</button>
-                                                </div>
-                                                
-                                            </div>
-                                            <div>
-                                            
-
-                                            </div>
-                                           
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-
-
-                </main>
-
-            </main>
-        </>
-
-    )
+        <div
+            role="tabpanel"
+            hidden={value !== index} // Hide the panel if it's not the active tab
+            id={`vertical-tabpanel-${index}`}
+            aria-labelledby={`vertical-tab-${index}`}
+            {...other}
+        >
+            {value === index && (
+                <TabPanelContainer>
+                    {children}
+                </TabPanelContainer>
+            )}
+        </div>
+    );
 }
 
-export default Dashboard
+// Main Home component
+export default function Home() {
+    const [value, setValue] = useState(0); // State for tab value
+    // State to store the card data
+    const [cardData] = useState([
+        { id: 1, title: "Avatar" },
+        { id: 2, title: "Inception" },
+        { id: 3, title: "Titanic" },
+        { id: 4, title: "Skylines" },
+    ]);
+
+    // Handle tab change
+    const handleChange = (event, newValue) => {
+        setValue(newValue);
+        // console.log('printing home component ', newValue);
+    };
+
+    const allStepsCompleted = () => {
+        return true;
+      };
+          
+
+    return (
+        <Container>
+            <Grid container>
+                <Grid item md={2} sm={3} xs={6}>
+                    <LeftBar value={value} onChange={handleChange} /> {/* Pass value and handleChange to LeftBar */}
+                </Grid>
+                <Grid item md={10} sm={9} xs={6}>
+                    <div>
+                        <NavBar /> {/* Render the NavBar component */}
+                    </div>
+                    <TabPanel value={value} index={0}>
+                        <div className='top_head'>
+                            <h3>Indian Panorama</h3>
+                        </div>
+                        <div className='card-container'>
+                            <CardIp cardData={cardData} allStepsCompletedFn={allStepsCompleted}/>
+                        </div>
+                    </TabPanel>
+                    <TabPanel value={value} index={1}>
+                    <div className='top_head'>
+                            <h3>Web Series (OTT)</h3>
+                        </div>
+                        <div className='card-container'>
+                            <CardOtt cardData={cardData} />
+                        </div>
+                        {/* <div className='top_head'>
+                            <h3>Web Series (OTT)</h3>
+                        </div>
+                        <div className='empty_crd'>
+                            <h4>You haven't added any entries yet. To get started, simply click on </h4>
+                        </div> */}
+
+                    </TabPanel>
+                    <TabPanel value={value} index={2}>
+                        <div className='top_head'>
+                            <h3>Creative minds of Tomorrow</h3>
+                        </div>
+                        <div className='card-container'>
+                            {/* <Card cardData={cardData} />  */}
+                            {/* Render cards with card data */}
+                        </div>
+                    </TabPanel>
+                </Grid>
+            </Grid>
+        </Container>
+    );
+}
+
+// Card component to display individual cards
+

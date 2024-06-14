@@ -24,6 +24,11 @@ import DeclarationAndPayment from './DeclarationAndPayment/DeclarationAndPayment
 import { useMediaQuery, useTheme } from '@mui/material';
 import ApiClient from '../common/ApiClient';
 
+import Preview from './OttPreview/Preview';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+// import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+
 const steps = [
     "Details Of Web Series",
     "Season & Episodes",
@@ -31,20 +36,41 @@ const steps = [
     "OTT-Platform",
     "Director & Creator",
     "Documents",
+    "Preview",
     "Declaration & Payment",
 ];
 const OttStepperData = () => {
-    const { postRequest, getRequest, patchRequest } = ApiClient();
+    const { postRequest, getRequest } = ApiClient();
     const { id = null, ip_step = 1 } = useParams();
+
     const [preData, setPredata] = useState({});
+    const [datatest, setDatatest] = useState(null);
 
     const loadpreData = async () => {
         if (id) {
             const predata = await getRequest(`ott/${id}`, {});
             const loadpredata = predata.data;
+
+            setActiveStep(loadpredata.step)
+            const documentData = {};
+            if (loadpredata.documents) {
+                for (const document of loadpredata.documents) {
+                    if (document.documents_type == 1) loadpredata.is_synopsis_profile = 1;
+                    else if (document.documents_type == 2) loadpredata.is_creator_profile = 1;
+                    else if (document.documents_type == 3) loadpredata.is_director_profile = 1;
+                    else if (document.documents_type == 4) loadpredata.is_brief_profile_of_producer = 1;
+
+                    documentData[document.documents_type] = {
+                        file: document.file,
+                        name: document.documents_name
+                    }
+                }
+            }
+            loadpredata.documentData = documentData;
+            console.log({ documentData })
             setFormData({
                 ...loadpredata,
-                //date_of_cbfc_certificate: dayjs(loadpredata.date_of_cbfc_certificate),
+                release_date: dayjs(loadpredata.release_date),
                 //date_of_completion_production: dayjs(loadpredata.date_of_completion_production),
             });
             setPredata(predata.data);
@@ -60,7 +86,7 @@ const OttStepperData = () => {
 
     const navigate = useNavigate()
     const [activeStep, setActiveStep] = useState(0);
-    console.log(activeStep, "activeStepDetails")
+    //console.log(activeStep, "activeStepDetails")
     const [completed, setCompleted] = useState({});
     // console.log(completed, "completed")
 
@@ -93,17 +119,20 @@ const OttStepperData = () => {
 
         const newCompleted = { ...completed };
         newCompleted[activeStep] = true;
-        handleNext();
+        //  handleNext();
+        console.log({ activeStep })
         if (activeStep === 0) {
             const { isValid, errors } = validateDetailsOfWebSeries(formData);
+            console.log(errors);
             if (!isValid) {
                 setWebSeriesErrors(errors)
                 return;
             }
             try {
                 let response
+                console.log({ formData })
                 if (id) {
-                    response = await patchRequest(`ott/${id}`, { ...formData, step: 1 });
+                    response = await postRequest(`ott/${id}`, { ...formData, step: 1 });
 
                 } else {
                     response = await postRequest("ott", { ...formData, step: 1 });
@@ -151,7 +180,8 @@ const OttStepperData = () => {
             };
             console.log({ updatedFormData });
             try {
-                const producer_data_check = await patchRequest(`ott/${id}`, updatedFormData);
+                updatedFormData.release_date = convertDate(updatedFormData.release_date);
+                const producer_data_check = await postRequest(`ott/${id}`, updatedFormData);
 
                 if (producer_data_check.status)
                     handleNext();
@@ -163,7 +193,10 @@ const OttStepperData = () => {
             }
         }
 
+
         if (activeStep === 2) {
+
+            console.log("validateProducerDetails");
             // Validation for the Producer Details step
             const { isValidProducer, errorsProducer } = validateProducerDetails(formData);
             // console.log(isValidProducer, "isValidProducer")
@@ -174,7 +207,7 @@ const OttStepperData = () => {
             }
 
             // formData.step=2;
-            // await patchRequest(`ott/${id}`,formData);
+            // await postRequest(`ott/${id}`,formData);
 
             if (!id) {
                 console.error("ID is not available.");
@@ -182,12 +215,12 @@ const OttStepperData = () => {
             }
             const updatedFormData = {
                 ...formData,
-                step: 2,
+                step: 3,
 
             };
             console.log({ updatedFormData });
             try {
-                const producer_data_check = await patchRequest(`ott/${id}`, updatedFormData);
+                const producer_data_check = await postRequest(`ott/${id}`, updatedFormData);
 
                 if (producer_data_check.status)
                     handleNext();
@@ -215,11 +248,11 @@ const OttStepperData = () => {
             }
             const updatedFormData = {
                 ...formData,
-                step: 3,
+                step: 4,
 
             };
             try {
-                const producer_data_check = await patchRequest(`ott/${id}`, updatedFormData);
+                const producer_data_check = await postRequest(`ott/${id}`, updatedFormData);
                 console.log(producer_data_check);
                 if (producer_data_check.status)
                     handleNext();
@@ -232,43 +265,7 @@ const OttStepperData = () => {
         }
 
         if (activeStep === 4) {
-            // Validation for the Crew Details step
-            const { isValidCrew, errorsCrew } = validateCrewDetails(formData);
-            // console.log(isValidCrew, "isValidCrew")
-            // console.log(errorsCrew,"errorsCrew")
-            if (!isValidCrew) {
-                setCrewErrors(errorsCrew);
-                return;
-            }
-            if (!id) {
-                console.error("ID is not available.");
-                return;
-            }
-            const updatedFormData = {
-                ...formData,
-                step: 4,
-
-            };
-            // try {
-            //     await patchRequest(`ott/${id}`, updatedFormData);
-            // } catch (error) {
-            //     console.error("Error:", error);
-            // }
-            try {
-                const producer_data_check = await patchRequest(`ott/${id}`, updatedFormData);
-
-
-                if (producer_data_check.status)
-                    handleNext();
-                else {
-                    alert(producer_data_check.message)
-                }
-            } catch (error) {
-                console.error("Error:", error);
-            }
-        }
-
-        if (activeStep === 5) {
+            console.log("errorsDirectorAndCreator");
             // Validation for the CBFC Certification Details step
             const { isValidDirectorAndCreator, errorsDirectorAndCreator } = validateDirectorAndCreatorDetails(formData);
             // console.log(isValidCbfc, "isValidCbfc")
@@ -288,14 +285,14 @@ const OttStepperData = () => {
 
             };
             // try {
-            //     await patchRequest(`ott/${id}`, updatedFormData);
+            //     await postRequest(`ott/${id}`, updatedFormData);
             // } catch (error) {
             //     console.error("Error:", error);
             // } convertDate
             try {
                 updatedFormData.date_of_cbfc_certificate = convertDate(updatedFormData.date_of_cbfc_certificate);
                 updatedFormData.date_of_completion_production = convertDate(updatedFormData.date_of_completion_production);
-                const producer_data_check = await patchRequest(`ott/${id}`, updatedFormData);
+                const producer_data_check = await postRequest(`ott/${id}`, updatedFormData);
 
 
                 if (producer_data_check.status)
@@ -308,11 +305,10 @@ const OttStepperData = () => {
             }
         }
 
-        if (activeStep === 6) {
-
+        if (activeStep === 5) {
+            console.log("step 5")
             const { isValidDocument, errorsDocument } = validateDocumentDetails(formData);
-            console.log(isValidDocument, "isValidDocument")
-            console.log(errorsDocument, "errorsDocument")
+
             if (!isValidDocument) {
                 setDocumentErrors(errorsDocument);
                 return;
@@ -328,7 +324,7 @@ const OttStepperData = () => {
             };
 
             try {
-                const producer_data_check = await patchRequest(`ott/${id}`, updatedFormData);
+                const producer_data_check = await postRequest(`ott/${id}`, updatedFormData);
 
                 if (producer_data_check.status)
                     handleNext();
@@ -339,6 +335,30 @@ const OttStepperData = () => {
                 console.error("Error:", error);
             }
         }
+
+        if (activeStep === 6) {
+            console.log("step 6")
+            //   handleNext();
+            const updatedFormData = {
+                ...formData,
+                step: 7,
+
+            };
+
+            try {
+                const producer_data_check = await postRequest(`ott/${id}`, updatedFormData);
+
+                if (producer_data_check.status)
+                    handleNext();
+                else {
+                    alert(producer_data_check.message)
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+
 
         if (activeStep === steps.length - 1) {
             // Final step, make the API call
@@ -372,26 +392,28 @@ const OttStepperData = () => {
 
     const validateDetailsOfWebSeries = (formData) => {
 
-        const { title, title_in_english, genre_id, subtitle_other_language, is_subtitle_language_eng, language_id } = formData;
+        const { genre_id, title, title_in_english, subtitle_other_language, is_subtitle_language_eng, language_id } = formData;
         const errors = {};
 
         if (!title) {
-            errors.title = "Title of Web Series(in the original language of release) is required";
+            errors.title = "Enter title of Web Series";
         }
         if (!title_in_english) {
-            errors.title_in_english = "English translation of the title is required";
+            errors.title_in_english = "Enter english translation of the title";
         }
         if (!genre_id) {
-            errors.genre_id = "Genre is required";
+            errors.genre_id = "Enter genre of Web Series";
         }
-        if (!subtitle_other_language) {
-            errors.subtitle_other_language = "Language in which the Web Series was originally released is required";
-        }
-        if (!is_subtitle_language_eng) {
-            errors.is_subtitle_language_eng = " Subtitle language in english is required";
+
+        if (!is_subtitle_language_eng && is_subtitle_language_eng !== 0) {
+            errors.is_subtitle_language_eng = "Select one option";
         }
         if (!language_id) {
-            errors.language_id = 'Language is required';
+            errors.language_id = 'Select language';
+        }
+
+        if (!subtitle_other_language) {
+            errors.subtitle_other_language = "Select language of subtitle";
         }
         const isValid = Object.keys(errors).length === 0;
 
@@ -400,7 +422,7 @@ const OttStepperData = () => {
 
     const validateSeasonAndEpisode = (formData) => {
 
-        const { season, runtime, number_of_episode, is_long_duration_timing, release_date,episode_number, title_in_english, genre_id, subtitle_other_language, is_subtitle_language_eng, language_id } = formData;
+        const { is_episode_added = null, season, runtime, number_of_episode, is_long_duration_timing, release_date, episode_number, title_in_english, subtitle_other_language, is_subtitle_language_eng, language_id } = formData;
         const errorsSeasonAndEpisode = {};
 
         if (!season) {
@@ -409,9 +431,7 @@ const OttStepperData = () => {
         if (!runtime) {
             errorsSeasonAndEpisode.runtime = "Total Runtime is required";
         }
-        if (!episode_number) {
-            errorsSeasonAndEpisode.episode_number = "Episode number is required";
-        }
+
         if (!number_of_episode) {
             errorsSeasonAndEpisode.number_of_episode = "Number of episodes is required";
         }
@@ -421,122 +441,67 @@ const OttStepperData = () => {
         if (!release_date) {
             errorsSeasonAndEpisode.release_date = "Release date is required";
         }
-        if (!subtitle_other_language) {
-            errorsSeasonAndEpisode.subtitle_other_language = "Language in which the Web Series was originally released is required";
+        if (!is_episode_added) {
+            errorsSeasonAndEpisode.is_episode_added = "Please add episode for the season.";
         }
-        if (!is_subtitle_language_eng) {
-            errorsSeasonAndEpisode.is_subtitle_language_eng = " Subtitle language in english is required";
-        }
-        if (!language_id) {
-            errorsSeasonAndEpisode.language_id = 'Language is required';
-        }
+
         const isValidSeasonEpisode = Object.keys(errorsSeasonAndEpisode).length === 0;
 
         return { isValidSeasonEpisode, errorsSeasonAndEpisode };
     };
 
     const validateProducerDetails = (formData) => {
-        console.log("data")
-        const { is_producer_id_proof = null, name_of_producers, return_address, return_address_mobile, return_address_landline, return_address_email, return_address_name, name_of_production_house, right_holder_address, right_holder_mobile, right_holder_landline, right_holder_email, right_holder_name, whether_indian_foreign_right_holder_same, right_holder_fax_number, is_address_same_as_producer, company_is_registered_as_indian_entity, producer_is, firm_is_owned_by_individual, name_of_firm, producer_email, email_producer, producer_landline, producer_mobile, producer_website, producer_address, producer_id_proof } = formData;
+
+        const { have_producer = null, has_coproduction, coproducer_type, coproducer_name, coproducer_address, coproducer_phone, coproducer_email, coproducer_is_follow_it_rules, coproducer_is_original_production, coproducer_is_registered, coproducer_is_residing_in_country } = formData;
         const errorsProducer = {};
 
-        // if (!name_of_producers) {
-        //     errorsProducer.name_of_producers = ""
-        // }
-
-        // && (is_address_same_as_producer===0 || is_address_same_as_producer ==='0')
-
-        if (!return_address && (is_address_same_as_producer === 0 || is_address_same_as_producer === '0')) {
-            errorsProducer.return_address = "Return address is required"
-        }
-
-        if (!return_address_mobile && (is_address_same_as_producer === 0 || is_address_same_as_producer === '0')) {
-            errorsProducer.return_address_mobile = "Return address mobile is required"
-        }
-
-        if (!return_address_landline && (is_address_same_as_producer === 0 || is_address_same_as_producer === '0')) {
-            errorsProducer.return_address_landline = "Return address landline is required"
-        }
-
-        if (!return_address_email && (is_address_same_as_producer === 0 || is_address_same_as_producer === '0')) {
-            errorsProducer.return_address_email = "Return address email is required"
-        }
-
-        if (!return_address_name && (is_address_same_as_producer === 0 || is_address_same_as_producer === '0')) {
-            errorsProducer.return_address_name = "Return address name is required"
-        }
-
-        if (!name_of_production_house) {
-            //errorsProducer.name_of_production_house = "Name of production house is required"
-        }
-        if (!right_holder_address && (whether_indian_foreign_right_holder_same === 0 || whether_indian_foreign_right_holder_same === '0')) {
-            errorsProducer.right_holder_address = "Right holder address is required"
-        }
-        if (!right_holder_mobile && (whether_indian_foreign_right_holder_same === 0 || whether_indian_foreign_right_holder_same === '0')) {
-            errorsProducer.right_holder_mobile = "Right holder mobile is required"
-        }
-        if (!right_holder_landline && (whether_indian_foreign_right_holder_same === 0 || whether_indian_foreign_right_holder_same === '0')) {
-            errorsProducer.right_holder_landline = "Right holder landline is required"
-        }
-
-        if (!right_holder_email && (whether_indian_foreign_right_holder_same === 0 || whether_indian_foreign_right_holder_same === '0')) {
-            errorsProducer.right_holder_email = "Right holder email is required"
-        }
-        if (!right_holder_name && (whether_indian_foreign_right_holder_same === 0 || whether_indian_foreign_right_holder_same === '0')) {
-            errorsProducer.right_holder_name = "Right holder name is required"
-        }
-        if (!(whether_indian_foreign_right_holder_same == 1 || whether_indian_foreign_right_holder_same === 0 || whether_indian_foreign_right_holder_same === '0')) {
-            errorsProducer.whether_indian_foreign_right_holder_same = "Wheather Indian foreign right holder is required"
-        }
-        if (!right_holder_fax_number && (whether_indian_foreign_right_holder_same === 0 || whether_indian_foreign_right_holder_same === '0')) {
-            //  errorsProducer.right_holder_fax_number = "Right holder Fax no is required"
+        if (has_coproduction === null) {
+            errorsProducer.has_coproduction = "Select one option";
         }
 
 
-        if (!(is_address_same_as_producer == 1 || is_address_same_as_producer === 0 || is_address_same_as_producer === '0')) {
-            errorsProducer.is_address_same_as_producer = "Is the address same as Producer yes or no required";
-        }
-        if (!company_is_registered_as_indian_entity || company_is_registered_as_indian_entity == '0') {
-            console.log("$$$$$$$$testing$$$$")
-            errorsProducer.company_is_registered_as_indian_entity = "Company is Registered as an Indian entity is required";
-        }
 
-        if (!producer_is) {
-            errorsProducer.producer_is = "Producer is required";
-        }
+        if (has_coproduction === 0 || has_coproduction === '0') {
+            if (!coproducer_type) {
+                errorsProducer.coproducer_type = "Select production type";
+            }
 
-        if (!(firm_is_owned_by_individual == 1 || firm_is_owned_by_individual == 0 || firm_is_owned_by_individual == '0')) {
-            errorsProducer.firm_is_owned_by_individual = "firm is owned by the individual is required";
-        }
-        if (!name_of_firm) {
-            errorsProducer.name_of_firm = "Name of the producer is required";
-        }
-        if (!producer_email) {
-            errorsProducer.producer_email = "Producer email is required";
-        }
+            if (!coproducer_name) {
+                errorsProducer.coproducer_name = " Enter your name";
+            }
 
-        if (!producer_landline) {
-            errorsProducer.producer_landline = "Producer landline is required";
-        }
+            if (!coproducer_address) {
+                errorsProducer.coproducer_address = "Enter your address";
+            }
 
-        if (!producer_mobile) {
-            errorsProducer.producer_mobile = "Producer mobile is required";
-        }
+            if (!coproducer_phone) {
+                errorsProducer.coproducer_phone = "Enter your phone number";
+            }
+            if (!coproducer_email) {
+                errorsProducer.coproducer_email = "Enter your email id";
+            }
 
-        // if (!email_producer) {
-        //     errorsProducer.email_producer = "Email is required";
-        // }
+            if (!coproducer_is_follow_it_rules) {
+                errorsProducer.coproducer_is_follow_it_rules = "Select one option";
+            }
 
-        if (!producer_website) {
-            errorsProducer.producer_website = "Producer website is required";
-        }
-        if (!producer_address) {
-            errorsProducer.producer_address = "Producer address is required";
-        }
-        console.log("company_is_registered_as_indian_entity")
-        console.log(company_is_registered_as_indian_entity)
-        if (!is_producer_id_proof && (company_is_registered_as_indian_entity === 1)) {
-            errorsProducer.producer_id_proof = "Photo ID is required"
+            if (!coproducer_is_original_production) {
+                errorsProducer.coproducer_is_original_production = "Select one option";
+            }
+
+
+            if (!coproducer_is_registered) {
+                errorsProducer.coproducer_is_registered = "Select one option";
+            }
+
+            if (!coproducer_is_residing_in_country) {
+                errorsProducer.coproducer_is_residing_in_country = "Select one option";
+            }
+
+        } else {
+            if (have_producer === null) {
+                errorsProducer.have_producer = "Please add at least one co-producer.";
+            }
         }
 
 
@@ -546,65 +511,67 @@ const OttStepperData = () => {
     };
 
     const validateOttPlatformDetails = (formData) => {
-        const { ott_released_platform, is_other_released_platform_available, director_indian_natinality, director_name, director_email, director_landline, director_mobile, director_fax, director_website, director_address, director_id_proof = null, is_released_other_country, is_thretrical_screening, is_streamed_other_media, is_international_competition } = formData;
+        const { ott_released_platform, is_other_released_platform_available, is_released_other_country,
+            is_thretrical_screening, is_streamed_other_media, is_international_competition,
+            is_streamed_country = null,
+            is_international_competetions_added = null,
+            is_threatical_screening_added = null,
+            is_broadcasted_added = null,
+
+
+        } = formData;
+        console.log({ formData })
         const errorsOttPlatform = {};
 
-        if (!is_international_competition) {
+        if (is_international_competition === null) {
             errorsOttPlatform.is_international_competition = "Select one option"
+        } else {
+            if (is_international_competition == 1) {
+                if (!is_international_competetions_added) {
+                    errorsOttPlatform.is_international_competetions_added = "Please add at least one international competetions."
+                }
+            }
         }
 
         if (!is_streamed_other_media) {
             errorsOttPlatform.is_streamed_other_media = "Select one option"
+        } else {
+            if (is_streamed_other_media == 1) {
+                if (!is_broadcasted_added) {
+                    errorsOttPlatform.is_broadcasted_added = "Please add at least one threatical screening."
+                }
+            }
         }
 
         if (!is_thretrical_screening) {
             errorsOttPlatform.is_thretrical_screening = "Select one option"
+        } else {
+            if (is_thretrical_screening == 1) {
+                if (!is_threatical_screening_added) {
+                    errorsOttPlatform.is_threatical_screening_added = "Please add at least one threatical screening."
+                }
+            }
         }
 
-        if (!is_released_other_country) {
+        if (is_released_other_country === null) {
             errorsOttPlatform.is_released_other_country = "Select one option"
+        } else {
+            if (is_released_other_country == 1) {
+                console.log({ is_streamed_country })
+                if (!is_streamed_country) {
+                    errorsOttPlatform.is_streamed_country = "Please add at least one streamed country."
+                }
+            }
         }
 
         if (!ott_released_platform) {
-            errorsOttPlatform.ott_released_platform = "Name of the OTT Platform is required"
+            errorsOttPlatform.ott_released_platform = "Enter name of the OTT Platform"
         }
 
-        if (!is_other_released_platform_available) {
+        if (is_other_released_platform_available === null) {
             errorsOttPlatform.is_other_released_platform_available = "Select one option"
         }
 
-
-        if (!director_id_proof) {
-            errorsOttPlatform.director_id_proof = "Photo ID is required"
-        }
-
-        if (!director_indian_natinality) {
-            errorsOttPlatform.director_indian_natinality = "Director indian nationality is required"
-        }
-
-        if (!director_name) {
-            errorsOttPlatform.director_name = "Director name is required";
-        }
-
-        if (!director_email) {
-            errorsOttPlatform.director_email = "Director email is required";
-        }
-
-        if (!director_landline) {
-            errorsOttPlatform.director_landline = "Director landline is required";
-        }
-        if (!director_mobile) {
-            errorsOttPlatform.director_mobile = "Director mobile is required";
-        }
-        if (!director_fax) {
-            errorsOttPlatform.director_fax = "Director fax is required";
-        }
-        if (!director_website) {
-            errorsOttPlatform.director_website = "Director website is required";
-        }
-        if (!director_address) {
-            errorsOttPlatform.director_address = "Director address is required";
-        }
 
 
         const isValidOttPlatform = Object.keys(errorsOttPlatform).length === 0;
@@ -612,208 +579,15 @@ const OttStepperData = () => {
         return { isValidOttPlatform, errorsOttPlatform };
     };
 
-    const validateCrewDetails = (formData) => {
-        const { story_write_aurthor, screenplay_script_write, director_of_photography, editor, art_director, costume_designer, music_director, sound_recordist, sound_re_recordist_optional, principal_cast_optional, duration_running_time, no_of_dcp_blueray, color_b_w, sound_system, aspect_ratio } = formData;
-        const errorsCrew = {};
-
-        if (!story_write_aurthor) {
-            errorsCrew.story_write_aurthor = "Story writer author is required";
-        }
-
-        if (!screenplay_script_write) {
-            errorsCrew.screenplay_script_write = "Screenplay script is required";
-        }
-
-        if (!director_of_photography) {
-            errorsCrew.director_of_photography = "Director of photography is required";
-        }
-        if (!editor) {
-            errorsCrew.editor = "Editor is required";
-        }
-        if (!art_director) {
-            errorsCrew.art_director = "Art director is required";
-        }
-        if (!costume_designer) {
-            errorsCrew.costume_designer = "Costume designer is required";
-        }
-        if (!music_director) {
-            errorsCrew.music_director = "Music director is required";
-        }
-        if (!sound_recordist) {
-            errorsCrew.sound_recordist = "Sound recordist is required";
-        }
-        // if (!sound_re_recordist_optional) {
-        //     errorsCrew.sound_re_recordist_optional = "Sound re recordist is required";
-        // }
-
-        // if (!principal_cast_optional) {
-        //     errorsCrew.principal_cast_optional = "Principal cast is required";
-        // }
-
-        if (!duration_running_time) {
-            errorsCrew.duration_running_time = "duration running is required";
-        }
-
-        // if (!no_of_dcp_blueray) {
-        //     errorsCrew.no_of_dcp_blueray = "No of dcp blueray is required";
-        // }
-
-        if (!color_b_w) {
-            errorsCrew.color_b_w = "Color b w is required";
-        }
-
-        if (!sound_system) {
-            errorsCrew.sound_system = "Sound system is required";
-        }
-
-        if (!aspect_ratio) {
-            errorsCrew.aspect_ratio = "Aspect ratio is required";
-        }
-
-
-        const isValidCrew = Object.keys(errorsCrew).length === 0;
-
-        return { isValidCrew, errorsCrew };
-    };
-
-    const validateCbfcDetails = (formData) => {
-        const { is_declaration_clause_file = null, is_file_cbfc_certificate = null, date_of_completion_production, film_is_certified_by_cbfc_or_uncensored = null, date_of_cbfc_certificate, certificate_no, declaration_clause_file = null, file_cbfc_certificate = null } = formData;
-        const errorsCbfc = {};
-
-        if (!date_of_completion_production && (film_is_certified_by_cbfc_or_uncensored === 2 || film_is_certified_by_cbfc_or_uncensored === '2')) {
-            errorsCbfc.date_of_completion_production = "Date of completion production is required"
-        }
-
-        if (!is_file_cbfc_certificate && film_is_certified_by_cbfc_or_uncensored == 1) {
-            errorsCbfc.file_cbfc_certificate = "File cbfc certificate is required"
-        }
-
-        if (!date_of_cbfc_certificate && (film_is_certified_by_cbfc_or_uncensored == 1)) {
-            errorsCbfc.date_of_cbfc_certificate = "Date of cbfc certificate is required"
-        }
-
-        // if (!(film_is_certified_by_cbfc_or_uncensored == 1 || film_is_certified_by_cbfc_or_uncensored === 0 || film_is_certified_by_cbfc_or_uncensored === '0')) {
-        //     //errorsCbfc.film_is_certified_by_cbfc_or_uncensored = "Film is certified by cbfc or uncensored is required";
-        // } film_is_certified_by_cbfc_or_uncensored
-
-        // if (!date_of_cbfc_certificate) {
-        //     errorsCbfc.date_of_cbfc_certificate = "Date of cbfc is required";
-        // }
-
-        if (!certificate_no && (film_is_certified_by_cbfc_or_uncensored == 1)) {
-            //  errorsCbfc.certificate_no = "Certificate is required";
-        }
-
-        if (!is_declaration_clause_file && (film_is_certified_by_cbfc_or_uncensored == 2)) {
-            errorsCbfc.declaration_clause_file = "Declaration is required";
-        }
-
-        // if(!(film_is_certified_by_cbfc_or_uncensored === 1 || film_is_certified_by_cbfc_or_uncensored === 0)){
-        //     errorsCbfc.film_is_certified_by_cbfc_or_uncensored = "Wheather the film is certified by CBFC or uncensored"
-        // }
-
-
-        const isValidCbfc = Object.keys(errorsCbfc).length === 0;
-        return { isValidCbfc, errorsCbfc };
-    };
-
     const validateDirectorAndCreatorDetails = (formData) => {
-        const { story_writer, screening_writer, director_of_photography, editior, art_director, costume_director, music_director, sound_designer, principal_cast, film_screened, film_broadcast_tv, film_screened_inside_india, film_screened_outside_india, film_participated_compentitaion, film_screened_any_indian_international_festival, name_of_festival, address_of_festival, date_of_festival, film_shown_broadcast_on_internate_tv, film_screened_commercially_inside_india, film_screened_commercially_outside_india, film_participated_in_any_compentitaion, is_directore_debute_film, film_distribution_limited_to_india_only, date_of_release, name_of_country, date_of_release_date, name_of_compentitaion_festival, details_of_awards_won_if_any } = formData;
+        const { is_director_added = null, is_creator_added = null } = formData;
         const errorsDirectorAndCreator = {};
 
-        if (!story_writer) {
-            errorsDirectorAndCreator.story_writer = "Story writer is required";
+        if (!is_creator_added) {
+            errorsDirectorAndCreator.is_creator_added = "Please add at least one Creator."
         }
-
-        if (!screening_writer) {
-            errorsDirectorAndCreator.screening_writer = "Screenplay writer is required";
-        }
-
-        if (!director_of_photography) {
-            errorsDirectorAndCreator.director_of_photography = "Director of photography is required";
-        }
-
-        if (!editior) {
-            errorsDirectorAndCreator.editior = "Editor is required";
-        }
-
-        if (!art_director) {
-            errorsDirectorAndCreator.art_director = "Art director is required";
-        }
-
-        if (!costume_director) {
-            errorsDirectorAndCreator.costume_director = "Costume director is required";
-        }
-
-        if (!music_director) {
-            errorsDirectorAndCreator.music_director = "Music director is required";
-        }
-
-        if (!sound_designer) {
-            errorsDirectorAndCreator.sound_designer = "Sound designer is required";
-        }
-
-        if (!principal_cast) {
-            errorsDirectorAndCreator.principal_cast = "Principal cost is required";
-        }
-
-        // if (!(film_comletion_during_12month == 1 || film_comletion_during_12month === 0 || film_comletion_during_12month === '0')) {
-        //     errorsDirectorAndCreator.film_comletion_during_12month = "Film completion during 12th month is required";
-        // }
-        if (!(film_screened || film_screened === 0 || film_screened === '0')) {
-            errorsDirectorAndCreator.film_screened = "Film screened any indian international festival is required";
-        }
-
-        if (!name_of_festival && film_screened_any_indian_international_festival == 1) {
-            errorsDirectorAndCreator.name_of_festival = "Name of festival is required";
-        }
-
-        if (!address_of_festival && film_screened_any_indian_international_festival == 1) {
-            errorsDirectorAndCreator.address_of_festival = "Address of festival is required";
-        }
-
-        if (!date_of_festival && film_screened_any_indian_international_festival == 1) {
-            errorsDirectorAndCreator.date_of_festival = "Date of festival is required";
-        }
-
-        if (!(film_broadcast_tv == 1 || film_broadcast_tv === 0 || film_broadcast_tv === '0')) {
-            errorsDirectorAndCreator.film_broadcast_tv = "Film shown broadcast on internate tv is required";
-        }
-
-        if (!(film_screened_inside_india == 1 || film_screened_inside_india === 0 || film_screened_inside_india === '0')) {
-            errorsDirectorAndCreator.film_screened_inside_india = "Film screened commercially inside india is required";
-        }
-        if (!date_of_release && film_screened_commercially_inside_india == 1) {
-            errorsDirectorAndCreator.date_of_release = "Date of release is required";
-        }
-        if (!(film_screened_outside_india == 1 || film_screened_outside_india === 0 || film_screened_outside_india === '0')) {
-            errorsDirectorAndCreator.film_screened_outside_india = "Film screened commercially outside india is required";
-        }
-        if (!name_of_country && film_screened_commercially_outside_india == 1) {
-            errorsDirectorAndCreator.name_of_country = "Name of country is required";
-        }
-
-
-        if (!date_of_release_date && film_screened_commercially_outside_india == 1) {
-            errorsDirectorAndCreator.date_of_release_date = "Date of release date is required";
-        }
-        if (!(film_participated_compentitaion == 1 || film_participated_compentitaion === 0 || film_participated_compentitaion === '0')) {
-            errorsDirectorAndCreator.film_participated_compentitaion = "Film participated in any international competition is required";
-        }
-
-        if (!name_of_compentitaion_festival && film_participated_in_any_compentitaion == 1) {
-            errorsDirectorAndCreator.name_of_compentitaion_festival = "Name of compentitation festival is required";
-        }
-
-        if (!(is_directore_debute_film == 1 || is_directore_debute_film === 0 || is_directore_debute_film === '0')) {
-            errorsDirectorAndCreator.is_directore_debute_film = "Is Director debute film is required yes or no";
-        }
-
-        if (!(film_distribution_limited_to_india_only == 1 || film_distribution_limited_to_india_only === 0 || film_distribution_limited_to_india_only === '0')) {
-            errorsDirectorAndCreator.film_distribution_limited_to_india_only = "Film distribution limited to india only is required yes or no";
-        }
-        if (!details_of_awards_won_if_any) {
-            // errorsOther.details_of_awards_won_if_any = "Details of awards won if any is required";
+        if (!is_director_added) {
+            errorsDirectorAndCreator.is_director_added = "Please add at least one  Director."
         }
 
         const isValidDirectorAndCreator = Object.keys(errorsDirectorAndCreator).length === 0;
@@ -821,7 +595,7 @@ const OttStepperData = () => {
     };
 
     const validateDocumentDetails = (formData) => {
-        const { is_synopsis_profile = null, is_creator_profile = null, is_director_profile = null, is_producer_profile = null } = formData;
+        const { is_brief_profile_of_producer = null, is_synopsis_profile = null, is_creator_profile = null, is_director_profile = null, is_producer_profile = null } = formData;
         const errorsDocument = {};
 
         if (!is_synopsis_profile) {
@@ -836,7 +610,7 @@ const OttStepperData = () => {
             errorsDocument.brief_profile_of_director = "Brief Profile Of Director's (Precise, Not Exceeding 200 words) is required";
         }
 
-        if (!is_producer_profile) {
+        if (!is_brief_profile_of_producer) {
             errorsDocument.brief_profile_of_producer = "Brief Profile Of Producer's (Precise, Not Exceeding 200 words) is required";
         }
 
@@ -885,7 +659,7 @@ const OttStepperData = () => {
     // };
 
     const renderStepContent = (step) => {
-
+        console.log('aditya',{step})
         switch (step) {
             case 0:
                 return <DetailsOfWebSeries formData={formData} setFormData={setFormData} errors={webSeriesErrors} setWebSeriesErrors={setWebSeriesErrors} />
@@ -893,16 +667,18 @@ const OttStepperData = () => {
             case 1:
                 return <Season formData={formData} setFormData={setFormData} errors={seasonEpisodeErrors} setSeasonEpisodeErrors={setSeasonEpisodeErrors} />
             case 2:
-                return <Producer />
+                return <Producer formData={formData} setFormData={setFormData} errors={producerErrors} setProducerErrors={setProducerErrors} />
             case 3:
-                return <OttPlatform formData={formData} setFormData={setFormData} errors={ottPlatformErrors} setOttPlatformErrors={setOttPlatformErrors} />
+                return <OttPlatform datatest={datatest} formData={formData} setFormData={setFormData} errors={ottPlatformErrors} setOttPlatformErrors={setOttPlatformErrors} />
             case 4:
                 return <DirectorAndCreatorDetails formData={formData} setFormData={setFormData} errors={directorCreatorErrors} setDirectorCreatorErrors={setDirectorCreatorErrors} />
             case 5:
                 return <Documents formData={formData} setFormData={setFormData} errors={documentErrors} setDocumentErrors={setDocumentErrors} />
             case 6:
-                return <DeclarationAndPayment />
+                return <Preview formData={formData} setActiveStep={setActiveStep} />
             case 7:
+                return <DeclarationAndPayment />
+            case 8:
                 return
             // <Declaration />;
             default:
@@ -1021,17 +797,20 @@ const OttStepperData = () => {
                     {renderStepContent(activeStep)}
                     <div className='row mt-4'>
                         <div className='col-lg-12 text-end'>
-                            <div className='d-flex justify-content-between'>
+                            <div className='d-flex justify-content-between mb-3'>
                                 <Button
                                     disabled={activeStep === 0}
                                     onClick={handleBack}
                                 >
+                                    <ChevronLeftIcon />
                                     Back
                                 </Button>
                                 {activeStep !== steps.length - 1 && (
                                     <Button onClick={handleComplete} style={{ backgroundColor: isStepCompleted(activeStep) ? "#4CAF50" : "#632340", color: "#fff" }}>
                                         {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                                        <NavigateNextIcon style={{ color: '#ffffff' }} />
                                     </Button>
+
                                 )}
                             </div>
                         </div>

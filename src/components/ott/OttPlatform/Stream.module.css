@@ -1,0 +1,24 @@
+.table_data{
+    /* font-family: arial, sans-serif; */
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.td_data{
+    border: 1px solid black;
+    text-align: left;
+    padding: 8px;
+}
+
+
+
+/* .even_data{
+    nth-child(even) {
+        background-color: #dddddd;
+      }
+} */
+
+/* .even_data.nth-child(even) {
+    background-color: #dddddd;
+  } */
+

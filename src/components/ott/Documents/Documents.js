@@ -7,9 +7,9 @@ import IconButton from '@mui/material/IconButton';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { GLOBAL_URL } from '../../../API/global';
 
-const Documents = ({ formData, setFormData, errors}) => {
+const Documents = ({ formData, setFormData, errors }) => {
 
-    const [selectedSynopsisProfile,setSelectedSynopsisProfile] = useState(null);
+    const [selectedSynopsisProfile, setSelectedSynopsisProfile] = useState(null);
     const [selectedCreatorProfile, setSelectedCreatorProfile] = useState(null);
     const [selectedDirectorProfile, setSelectedDirectorProfile] = useState(null);
     const [selectedProducerProfile, setSelectedProducerProfile] = useState(null);
@@ -42,7 +42,7 @@ const Documents = ({ formData, setFormData, errors}) => {
         setFormData((prevState) => ({
             ...prevState,
             synopsis: profileOfSynopsis,
-            is_synopsis_profile:1,
+            is_synopsis_profile: 1,
         }));
     };
 
@@ -54,7 +54,7 @@ const Documents = ({ formData, setFormData, errors}) => {
         setFormData((prevState) => ({
             ...prevState,
             brief_profile_of_creator: profileOfCreator,
-            is_creator_profile:1,
+            is_creator_profile: 1,
         }));
     };
 
@@ -67,7 +67,7 @@ const Documents = ({ formData, setFormData, errors}) => {
         setFormData((prevState) => ({
             ...prevState,
             brief_profile_of_director: profileOfDirector,
-            is_director_profile:1,
+            is_director_profile: 1,
 
         }));
     };
@@ -81,7 +81,7 @@ const Documents = ({ formData, setFormData, errors}) => {
         setFormData((prevState) => ({
             ...prevState,
             brief_profile_of_producer: ProfileOfProducer,
-            is_producer_profile: 1,
+            is_brief_profile_of_producer: 1,
         }));
     }
     return (
@@ -92,7 +92,7 @@ const Documents = ({ formData, setFormData, errors}) => {
             <p className='text-danger'>NOTE:</p>
             <p className='text-danger text-capitalize'>In case of multiple Director's, Creator's, Producer's, Their profile should be consolidated in one document</p>
 
-            
+
             <form>
                 <Grid container spacing={2}>
                     <Grid item xs={12} sm={12} md={12} lg={12}>
@@ -135,10 +135,10 @@ const Documents = ({ formData, setFormData, errors}) => {
                                         {errors.synopsis && (
                                             <p className="text-danger">{errors.synopsis}</p>
                                         )}
-                                        {!(formData?.documentData?.[5]) ? <></> : (
+                                        {!(formData?.documentData?.[1]) ? <></> : (
                                             <div>
                                                 <span className="Attach_Photo_ID">
-                                                    <a href={`${GLOBAL_URL}downloadfile/IP/${formData.id}/${formData?.documentData?.[5].file}`}>{formData?.documentData?.[5].name}</a>
+                                                    <a href={`${GLOBAL_URL}downloadfile/ott/${formData.id}/${formData?.documentData?.[1].file}`}>{formData?.documentData?.[1].name}</a>
                                                 </span>
                                             </div>
                                         )}
@@ -184,10 +184,10 @@ const Documents = ({ formData, setFormData, errors}) => {
                                         {errors.brief_profile_of_creator && (
                                             <p className="text-danger">{errors.brief_profile_of_creator}</p>
                                         )}
-                                        {!(formData?.documentData?.[6]) ? <></> : (
+                                        {!(formData?.documentData?.[2]) ? <></> : (
                                             <div>
                                                 <span className="Attach_Photo_ID">
-                                                    <a href={`${GLOBAL_URL}downloadfile/IP/${formData.id}/${formData?.documentData?.[6].file}`}>{formData?.documentData?.[6].name}</a>
+                                                    <a href={`${GLOBAL_URL}downloadfile/ott/${formData.id}/${formData?.documentData?.[2].file}`}>{formData?.documentData?.[2].name}</a>
                                                 </span>
                                             </div>
                                         )}
@@ -239,10 +239,10 @@ const Documents = ({ formData, setFormData, errors}) => {
                                         {errors.brief_profile_of_director && (
                                             <p className="text-danger">{errors.brief_profile_of_director}</p>
                                         )}
-                                        {!(formData?.documentData?.[7]) ? <></> : (
+                                        {!(formData?.documentData?.[3]) ? <></> : (
                                             <div>
                                                 <span className="Attach_Photo_ID">
-                                                    <a href={`${GLOBAL_URL}downloadfile/IP/${formData.id}/${formData?.documentData?.[7].file}`}>{formData?.documentData?.[7].name}</a>
+                                                    <a href={`${GLOBAL_URL}downloadfile/ott/${formData.id}/${formData?.documentData?.[3].file}`}>{formData?.documentData?.[3].name}</a>
                                                 </span>
                                             </div>
                                         )}
@@ -288,10 +288,10 @@ const Documents = ({ formData, setFormData, errors}) => {
                                         {errors.brief_profile_of_producer && (
                                             <p className="text-danger">{errors.brief_profile_of_producer}</p>
                                         )}
-                                        {!(formData?.documentData?.[8]) ? <></> : (
+                                        {!(formData?.documentData?.[4]) ? <></> : (
                                             <div>
                                                 <span className="Attach_Photo_ID">
-                                                    <a href={`${GLOBAL_URL}downloadfile/IP/${formData.id}/${formData?.documentData?.[8].file}`}>{formData?.documentData?.[8].name}</a>
+                                                    <a href={`${GLOBAL_URL}downloadfile/ott/${formData.id}/${formData?.documentData?.[4].file}`}>{formData?.documentData?.[4].name}</a>
                                                 </span>
                                             </div>
                                         )}

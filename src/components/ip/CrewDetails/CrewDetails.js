@@ -6,6 +6,7 @@ import Grid from '@mui/material/Grid';
 
 const CrewDetails = ({ formData, setFormData, errors, setCrewErrors }) => {
 
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevData => ({
@@ -17,27 +18,48 @@ const CrewDetails = ({ formData, setFormData, errors, setCrewErrors }) => {
   };
 
   useEffect(() => {
-    // Fetch data from backend and ensure that null values are converted to empty strings
+    // Function to fetch data from backend
     const fetchData = async () => {
-      const backendData = {
-        costume_designer: null, // Example data from backend
-        sound_re_recordist: null,
-        principal_cast: null,
-        no_of_dcp_blueray: null
-      };
+        try {
+            // Simulate fetching data from the backend
+            const backendData = {
+              costume_designer: "null", // Example data from backend
+              sound_re_recordist: "null",
+              principal_cast: "null",
+              no_of_dcp_blueray:"null"
+            };
 
-      setFormData(prevData => ({
-        ...prevData,
-        costume_designer: backendData.costume_designer ?? '',
-        sound_re_recordist: backendData.sound_re_recordist ?? '',
-        principal_cast: backendData.principal_cast ?? '',
-        no_of_dcp_blueray: backendData.no_of_dcp_blueray ?? ''
-      }));
+            console.log('Raw backend data:', backendData); // Log raw data
+
+                 // Helper function to replace null or "null" or undefined with an empty string
+                 const replaceNull = (value) => {
+                  console.log('Checking value:', value); // Log the value being checked
+                  return (value === null || value === "null" || value === undefined || value === "undefined"  ? '' : value);
+              };
+              
+            // Processed data
+            const processedData = {
+              costume_designer: replaceNull(backendData.costume_designer),
+              sound_re_recordist: replaceNull(backendData.sound_re_recordist),
+              principal_cast: replaceNull(backendData.principal_cast),
+              no_of_dcp_blueray: replaceNull(backendData.no_of_dcp_blueray),
+            };
+
+            console.log('Processed data:', processedData); // Log processed data
+
+            // Update form data with fetched data
+            setFormData(prevData => ({
+                ...prevData,
+                ...processedData,
+            }));
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            // Handle the error as needed (e.g., show a notification to the user)
+        }
     };
 
     fetchData();
-  }, [setFormData]);
-
+}, [setFormData]);
 
   return (
     <>
@@ -167,7 +189,7 @@ const CrewDetails = ({ formData, setFormData, errors, setCrewErrors }) => {
                 className="input_border"
                 name="costume_designer"
                 // value={formData.costume_designer}
-                value={formData.costume_designer ?? ''}
+                value={formData.costume_designer}
                 onChange={handleChange}
               />
             </Box>
@@ -230,7 +252,7 @@ const CrewDetails = ({ formData, setFormData, errors, setCrewErrors }) => {
                 className="input_border"
                 name="sound_re_recordist"
                 // value={formData.sound_re_recordist}
-                value={formData.sound_re_recordist ?? ''}
+                value={formData.sound_re_recordist}
                 onChange={handleChange}
               />
             </Box>
@@ -250,7 +272,7 @@ const CrewDetails = ({ formData, setFormData, errors, setCrewErrors }) => {
                 className="input_border"
                 name="principal_cast"
                 // value={formData.principal_cast}
-                value={formData.principal_cast ?? ''}
+                value={formData.principal_cast}
                 onChange={handleChange}
               />
             </Box>
@@ -288,61 +310,132 @@ const CrewDetails = ({ formData, setFormData, errors, setCrewErrors }) => {
                 //     borderRadius: "5px",
                 //   },
                 // }}
-
+type='number'
                 className="input_border"
                 name="no_of_dcp_blueray"
                 // value={formData.no_of_dcp_blueray}
-                value={formData.no_of_dcp_blueray ?? ''}
+                value={formData.no_of_dcp_blueray}
                 onChange={handleChange}
               />
             </Box>
           </Grid>
           <Grid item xs={12} sm={12} md={6} lg={6}>
             <Box>
-              <TextField
-                fullWidth
-                label='Colour or B&W'
-                // InputProps={{
-                //   style: {
-                //     border: "1px solid #CF528A",
-                //     borderRadius: "5px",
-                //   },
-                // }}
-                className="input_border"
+            <h6>Colour or B&W</h6>
+            <div className="form-check form-check-inline">
+              <input
+                className="form-check-input"
+                type="radio"
                 name="color_b_w"
-                value={formData.color_b_w}
+                id="color_b_w"
+                value="Colour"
+                checked={formData.color_b_w == "Colour"}
                 onChange={handleChange}
               />
-              {errors.color_b_w && (
-                <p className="text-danger">{errors.color_b_w}</p>
-              )}
-            </Box>
-          </Grid>
-          <Grid item xs={12} sm={12} md={6} lg={6}>
-            <Box>
-              <TextField
-                fullWidth
-                label='Sound System: Optical Mono /Dolby/ DTS/Atmos or others'
-                // InputProps={{
-                //   style: {
-                //     border: "1px solid #CF528A",
-                //     borderRadius: "5px",
-                //   },
-                // }}
-                className="input_border"
-                name="sound_system"
-                value={formData.sound_system}
+              <label className="form-check-label" htmlFor="sound_system_Colour">
+              Colour
+              </label>
+            </div>
+            <div className="form-check form-check-inline">
+              <input
+                className="form-check-input"
+                type="radio"
+                name="color_b_w"
+                id="color_b_w"
+                value="B&W"
+                checked={formData.color_b_w == "B&W"}
                 onChange={handleChange}
               />
-              {errors.sound_system && (
-                <p className="text-danger">{errors.sound_system}</p>
-              )}
+              <label className="form-check-label" htmlFor="sound_system_B&W">
+              B&W
+              </label>
+            </div>
+            {errors.color_b_w && (
+              <p className="text-danger">{errors.color_b_w}</p>
+            )}
             </Box>
           </Grid>
+      
         </Grid>
 
         <Grid container className='mt-4'>
           <Grid item xs={12} sm={12} md={6} lg={6}>
+            <h6>Sound System</h6>
+            <div className="form-check form-check-inline">
+              <input
+                className="form-check-input"
+                type="radio"
+                name="sound_system"
+                id="sound_system"
+                value="Optical Mono"
+                checked={formData.sound_system == "Optical Mono"}
+                onChange={handleChange}
+              />
+              <label className="form-check-label" htmlFor="sound_system_optical">
+              Optical Mono
+              </label>
+            </div>
+            <div className="form-check form-check-inline">
+              <input
+                className="form-check-input"
+                type="radio"
+                name="sound_system"
+                id="sound_system"
+                value="Dolby"
+                checked={formData.sound_system == "Dolby"}
+                onChange={handleChange}
+              />
+              <label className="form-check-label" htmlFor="sound_system_dolby">
+              Dolby
+              </label>
+            </div>
+            <div className="form-check form-check-inline">
+              <input
+                className="form-check-input"
+                type="radio"
+                name="sound_system"
+                id="sound_system"
+                value="DTS"
+                checked={formData.sound_system == "DTS"}
+                onChange={handleChange}
+              />
+              <label className="form-check-label" htmlFor="sound_system_DTS">
+              DTS
+              </label>
+            </div>
+            <div className="form-check form-check-inline">
+              <input
+                className="form-check-input"
+                type="radio"
+                name="sound_system"
+                id="sound_system"
+                value="Atmos"
+                checked={formData.sound_system == "Atmos"}
+                onChange={handleChange}
+              />
+              <label className="form-check-label" htmlFor="sound_system_Atmos">
+              Atmos
+              </label>
+            </div>
+            <div className="form-check form-check-inline">
+              <input
+                className="form-check-input"
+                type="radio"
+                name="sound_system"
+                id="sound_system"
+                value="Others"
+                checked={formData.sound_system == "Others"}
+                onChange={handleChange}
+              />
+              <label className="form-check-label" htmlFor="sound_system_Others">
+              Others
+              </label>
+            </div>
+            {errors.sound_system && (
+              <p className="text-danger">{errors.sound_system}</p>
+            )}
+          </Grid>
+          <Grid item xs={6} sm={6} md={6} lg={6}>
             <h6>Aspect Ratio</h6>
             <div className="form-check form-check-inline">
               <input
@@ -377,6 +470,7 @@ const CrewDetails = ({ formData, setFormData, errors, setCrewErrors }) => {
             )}
           </Grid>
         </Grid>
+
       </form>
     </>
   )

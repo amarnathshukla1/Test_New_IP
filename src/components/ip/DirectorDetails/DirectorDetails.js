@@ -31,47 +31,37 @@ const DirectorDetails = ({ formData, setFormData, errors, setDirectorErrors }) =
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const newValue = value.replace(/\D/g, '').slice(0, 10);
+    const newValue = value.replace(/\D/g, '').slice(0, 10); // Ensure numeric input
+
+    // Prepare an updated form data object
+    let updatedFormData = {};
 
     if (name === "director_indian_natinality" && (value === 0 || value === "0")) {
-      setOpen(true);
-      setFormData(prevData => ({
-        ...prevData,
-        [name]: null
-      }));
+        setOpen(true);
+        updatedFormData[name] = null;
     } else {
-      setFormData(prevData => ({
-        ...prevData,
-        [name]: parseInt(value),
-      }));
+        if (name === "director_mobile") {
+            updatedFormData[name] = newValue;
+        } else {
+            updatedFormData[name] = value;
+        }
 
-      if (name == "director_mobile") {
-        setFormData(prevData => ({
-          ...prevData,
-          [name]: newValue
-        }));
-      } else {
-        setFormData(prevData => ({
-          ...prevData,
-          [name]: value
-        }));
-      }
-      // setFormData(prevData => ({
-      //   ...prevData,
-      //   [name]: value
-      // }));
-      errors[name] = ""
-      setDirectorErrors(errors);
-
-      // If "No" is selected, show the modal
-      // if (name === "director_indian_natinality" && value === "No") {
-      //   setOpen(true);
-      // }
-
+        // If the field is supposed to be an integer, parse it
+        if (["some_integer_field_name_1", "some_integer_field_name_2"].includes(name)) {
+            updatedFormData[name] = parseInt(value, 10);
+        }
     }
 
+    setFormData(prevData => ({
+        ...prevData,
+        ...updatedFormData,
+    }));
 
-  };
+    // Clear the errors for the current field
+    errors[name] = "";
+    setDirectorErrors(errors);
+};
+
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -105,18 +95,37 @@ const DirectorDetails = ({ formData, setFormData, errors, setDirectorErrors }) =
   // };
 
   const [selectedDirectorFile, setSelectedDirectorFile] = useState(null);
-
+  const [error, setError] = useState('');
   const handleFileChange = (event) => {
-    setSelectedDirectorFile(event.target.files[0]);
     const file = event.target.files[0];
-    // Do something with the uploaded file
-    console.log(file);
-    console.log("Selected Director file:", selectedDirectorFile);
-    setFormData((prevState) => ({
-      ...prevState,
-      director_id_proof: file,
-      is_director_id_proof: 1,
-    }));
+    
+    if (file && file.type === 'application/pdf') {
+      setSelectedDirectorFile(file);
+      setError('');
+      setFormData((prevState) => ({
+        ...prevState,
+        director_id_proof: file,
+        is_director_id_proof: 1,
+      }));
+
+      console.log("Selected file:", file);
+      // You can use FormData API to send the file to the server via fetch or Axios
+      // For example:
+      // const formData = new FormData();
+      // formData.append('file', file);
+      // Then use fetch or Axios to send formData to your backend
+    } else {
+      setSelectedDirectorFile(null);
+      setError('Please upload a PDF file.');
+      setFormData((prevState) => ({
+        ...prevState,
+        director_id_proof: null,
+        is_director_id_proof: false,
+      }));
+    }
+  };
+
+    
     // const formDataToSubmit = new FormData();
     // formDataToSubmit.append('director_id_proof', formData.director_id_proof);
     // You can use FormData API to send the file to the server via fetch or Axios
@@ -124,30 +133,48 @@ const DirectorDetails = ({ formData, setFormData, errors, setDirectorErrors }) =
     // const formData = new FormData();
     // formData.append('file', selectedFile);
     // Then use fetch or Axios to send formData to your backend
-  };
+
 
 
   useEffect(() => {
-    // Fetch data from backend and ensure that null values are converted to empty strings
+    // Function to fetch data from backend
     const fetchData = async () => {
-      const backendData = {
-        director_landline: null, // Example data from backend
-        director_fax: null,
-        director_website: null,
+        try {
+            // Simulate fetching data from the backend
+            const backendData = {
+                director_landline: "null", // Example data from backend
+                director_fax: "null",
+                director_website: "null",
+            };
 
-      };
+            console.log('Raw backend data:', backendData); // Log raw data
 
-      setFormData(prevData => ({
-        ...prevData,
-        director_landline: backendData.director_landline ?? '',
-        director_fax: backendData.director_fax ?? '',
-        director_website: backendData.director_website ?? '',
+            // Helper function to replace null or "null" with an empty string
+            const replaceNull = (value) => (value === null || value === "null" ? '' : value);
 
-      }));
+            // Processed data
+            const processedData = {
+                director_landline: replaceNull(backendData.director_landline),
+                director_fax: replaceNull(backendData.director_fax),
+                director_website: replaceNull(backendData.director_website),
+            };
+
+            console.log('Processed data:', processedData); // Log processed data
+
+            // Update form data with fetched data
+            setFormData(prevData => ({
+                ...prevData,
+                ...processedData,
+            }));
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            // Handle the error as needed (e.g., show a notification to the user)
+        }
     };
 
     fetchData();
-  }, [setFormData]);
+}, [setFormData]);
+
   return (
     <>
       <h4 className="text-capitalize">Director's Details<span className="text-danger">*</span></h4>
@@ -214,7 +241,7 @@ const DirectorDetails = ({ formData, setFormData, errors, setDirectorErrors }) =
                 className="input_border"
                 name="director_landline"
                 // value={formData.director_landline}
-                value={formData.director_landline ?? ''}
+                value={formData.director_landline}
 
                 onChange={handleChange}
               />
@@ -252,7 +279,7 @@ const DirectorDetails = ({ formData, setFormData, errors, setDirectorErrors }) =
                 className="input_border"
                 name="director_fax"
                 // value={formData.director_fax}
-                value={formData.director_fax ?? ''}
+                value={formData.director_fax}
                 onChange={handleChange}
               />
             </Box>
@@ -270,7 +297,7 @@ const DirectorDetails = ({ formData, setFormData, errors, setDirectorErrors }) =
               className="input_border"
               name="director_website"
               // value={formData.director_website}
-              value={formData.director_website ?? ''}
+              value={formData.director_website}
               onChange={handleChange}
             />
           </Grid>
@@ -371,7 +398,7 @@ const DirectorDetails = ({ formData, setFormData, errors, setDirectorErrors }) =
             // value={formData.producer_id_proof}
             // onChange={handleChange} 
             />
-            <label htmlFor="fileInput" style={{ width: "100%", height: "100%" }}>
+            <label htmlFor="fileInput" style={{ width: "100%" }}>
               <TextField
                 variant="outlined"
                 placeholder="Upload Your File in PDF Format Only"
@@ -397,10 +424,10 @@ const DirectorDetails = ({ formData, setFormData, errors, setDirectorErrors }) =
                 fullWidth
               />
             </label>
+            {error && (
+          <p className="text-danger">{error}</p>
+        )}
           </div>
-          {errors.director_id_proof && (
-            <p className="text-danger">{errors.director_id_proof}</p>
-          )}
         </div>
       </form>
     </>

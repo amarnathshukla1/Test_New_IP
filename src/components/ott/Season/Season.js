@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from 'react'
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -11,13 +11,20 @@ import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { useState } from 'react';
+import { useState, useReducer } from 'react';
 
 
 import dayjs from 'dayjs';
 import ApiClient from '../../common/ApiClient';
 import userEvent from '@testing-library/user-event';
 import { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+
+// import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import Button from '@mui/material/Button';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteDialog from '../../ip/DeleteDialog';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -29,25 +36,42 @@ const Item = styled(Paper)(({ theme }) => ({
 
 
 const Season = ({ formData, setFormData, errors, setSeasonEpisodeErrors }) => {
+    const [reducerValue, forceUpdate] = useReducer(x => x + 1, 0);
+    const { id = null } = useParams();
     const { putRequest, getRequest, deleteRequest } = ApiClient();
     const [errorsEpisodeForm, setErrorsEpisodeForm] = useState({});
     const [preEpisodeData, setPreEpisodeData] = useState([]);
     const [episodeFormData, setEpisodeFormData] = React.useState({
         episode_number: '',
         release_date: null,
-        ott_form_id: '1',
+        ott_form_id: id,
     });
     const loadEpisodeData = async () => {
-        const preData = await getRequest(`ott/1/episode`);
-        const data = preData.data;
+        const preEpisodeData = await getRequest(`ott/${id}/episode`);
+        const data = preEpisodeData.data;
 
-        //  if (data && data.length < 5) setShowAddNewEntry(true)
+        if (data.length > 0) {
+            setFormData({
+                ...formData,
+                is_episode_added: true
+            })
+            setSeasonEpisodeErrors({
+                ...errors,
+                is_episode_added: null
+            })
+        } else {
+            setFormData({
+                ...formData,
+                is_episode_added: null
+            })
+
+        }
         setPreEpisodeData(data);
     }
     useEffect(() => {
         loadEpisodeData();
 
-    }, []);
+    }, [reducerValue]);
 
     const validateEpisodeForm = () => {
         const newErrors = {};
@@ -81,6 +105,7 @@ const Season = ({ formData, setFormData, errors, setSeasonEpisodeErrors }) => {
 
         if (e) {
             const formattedDate = e.format('YYYY-MM-DD');
+            console.log(formattedDate)
             setFormData(prevData => ({
                 ...prevData,
                 release_date: dayjs(formattedDate)
@@ -93,7 +118,7 @@ const Season = ({ formData, setFormData, errors, setSeasonEpisodeErrors }) => {
         e.preventDefault();
 
         if (!validateEpisodeForm()) return;
-        const id = 1;
+
         try {
 
             const response = await putRequest(`ott/${id}/episode`, episodeFormData)
@@ -108,11 +133,12 @@ const Season = ({ formData, setFormData, errors, setSeasonEpisodeErrors }) => {
             setEpisodeFormData({
                 episode_number: '',
                 release_date: null,
-                ott_form_id: 1,
+                ott_form_id: id,
             });
-            loadEpisodeData();
+            // loadEpisodeData();
+            forceUpdate();
             alert('Form has submitted successfully!');
-            //  await loadpreData();
+            //  await loadpreEpisodeData();
         } catch (error) {
             console.error("Error: ", error);
             alert('Error submitting form. Please try again later.');
@@ -121,8 +147,6 @@ const Season = ({ formData, setFormData, errors, setSeasonEpisodeErrors }) => {
     const submitDeleteEpisode = async (index, e) => {
         e.preventDefault();
 
-
-        const id = 1;
         try {
 
             const response = await deleteRequest(`ott/${id}/episode/${index}`, episodeFormData)
@@ -135,9 +159,10 @@ const Season = ({ formData, setFormData, errors, setSeasonEpisodeErrors }) => {
 
             // Reset form after co-Producer submission
 
-            loadEpisodeData();
+            // loadEpisodeData();
             alert('Episode deleted successfully!');
-            //  await loadpreData();
+            forceUpdate();
+            //  await loadpreEpisodeData();
         } catch (error) {
             console.error("Error: ", error);
             alert('Error submitting form. Please try again later.');
@@ -154,6 +179,13 @@ const Season = ({ formData, setFormData, errors, setSeasonEpisodeErrors }) => {
         setSeasonEpisodeErrors(errors);
 
     };
+
+    const handleKeyDown = (event) => {
+        // Prevent the letter 'e', '+', '-', '.' and other non-numeric characters
+        if (['e', 'E', '+', '-', '.'].includes(event.key)) {
+            event.preventDefault();
+        }
+    };
     return (
         <>
 
@@ -167,8 +199,7 @@ const Season = ({ formData, setFormData, errors, setSeasonEpisodeErrors }) => {
                         // border:"1px solid green",
                         borderRadius: "15px",
                     }} >
-                        <Box
-                        >
+                        <Box>
                             <TextField
                                 label="Season"
                                 type="text"
@@ -187,11 +218,13 @@ const Season = ({ formData, setFormData, errors, setSeasonEpisodeErrors }) => {
                         <Box>
                             <TextField
                                 label="Total Runtime (in minutes)"
-                                type="text"
+                                type="tel"
                                 fullWidth
                                 name="runtime"
                                 value={formData.runtime}
                                 onChange={handleChange}
+                                onKeyDown={handleKeyDown}
+                                inputProps={{ maxLength: 5 }}
                             />
                         </Box>
                         {errors.runtime && (
@@ -202,11 +235,12 @@ const Season = ({ formData, setFormData, errors, setSeasonEpisodeErrors }) => {
                         <Box>
                             <TextField
                                 label="Number of episodes"
-                                type="text"
+                                type="number"
                                 fullWidth
                                 name="number_of_episode"
                                 value={formData.number_of_episode}
                                 onChange={handleChange}
+                                onKeyDown={handleKeyDown}
                             />
                         </Box>
                         {errors.number_of_episode && (
@@ -237,7 +271,7 @@ const Season = ({ formData, setFormData, errors, setSeasonEpisodeErrors }) => {
                                     name="is_long_duration_timing"
                                     id="is_long_duration_timing_no"
                                     value="0"
-                                    checked={formData.is_long_duration_timing === 0 || formData.is_long_duration_timing === "0" }
+                                    checked={formData.is_long_duration_timing === 0 || formData.is_long_duration_timing === "0"}
                                     onChange={handleChange}
                                 />
                                 <label className="form-check-label" htmlFor="is_long_duration_timing_no">
@@ -249,18 +283,9 @@ const Season = ({ formData, setFormData, errors, setSeasonEpisodeErrors }) => {
                             )}
                         </div>
                     </Grid>
-
                     <Grid item xs={12} sm={12} md={6} lg={6}>
                         <Box style={{ width: "100%" }}>
                             <FormControl
-                                sx={{
-                                    width: {
-                                        xs: '100%', // 100% width on extra-small screens
-                                        sm: '100%', // 100% width on small screens
-                                        md: '100%', // 100% width on medium screens
-                                        lg: '100%', // 100% width on large screens
-                                    }
-                                }}
                             >
                                 <LocalizationProvider dateAdapter={AdapterDayjs} >
                                     <DemoContainer components={['DatePicker']}>
@@ -269,32 +294,14 @@ const Season = ({ formData, setFormData, errors, setSeasonEpisodeErrors }) => {
                                             name="release_date"
                                             value={formData.release_date}
                                             onChange={handleSeasonReleaseDate}
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    height: {
-                                                        xs: '48px', // height for extra-small screens
-                                                        sm: '52px', // height for small screens
-                                                        md: '56px', // height for medium screens
-                                                        lg: '62px', // height for large screens
-                                                    },
-                                                    width: {
-                                                        xs: '100%', // 100% width on extra-small screens
-                                                        sm: '100%', // 100% width on small screens
-                                                        md: '640px', // 100% width on medium screens
-                                                        lg: '640px', // 100% width on large screens
-                                                    },
-                                                    borderRadius: {
-                                                        xs: '4px', // border-radius for extra-small screens
-                                                        sm: '5px', // border-radius for small screens
-                                                        md: '6px', // border-radius for medium screens
-                                                        lg: '7px', // border-radius for large screens
-                                                    },
-                                                }
-                                            }}
+                                            minDate={dayjs('2023-08-01')}
+                                            maxDate={dayjs('2024-07-31')}
                                         />
                                     </DemoContainer>
                                 </LocalizationProvider>
                             </FormControl>
+
+
                         </Box>
                         {errors.release_date && (
                             <p className="text-danger">{errors.release_date}</p>
@@ -302,113 +309,150 @@ const Season = ({ formData, setFormData, errors, setSeasonEpisodeErrors }) => {
                     </Grid>
                 </Grid>
                 <br />
-                <Grid container spacing={2}>
-
-                    {
-                        preEpisodeData.map((item, index) => (
-
-                            <>
-                                <Grid item xs={3} sm={3} md={3} lg={3} className='mt-2'>
-                                    Episode NUmber:
-                                </Grid>
-                                <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                                    {item.episode_number}
-                                </Grid>
-                                <Grid item xs={3} sm={3} md={3} lg={3} className='mt-2'>
-                                    Release Date :
-                                </Grid>
-                                <Grid item xs={3} sm={3} md={3} lg={3} className='mt-2'>
-                                    {item.release_date}
-                                </Grid>
-                                <Grid item xs={1} sm={1} md={1} lg={1} className='mt-2'>
-                                    <button className='btn btn-danger'
-                                        onClick=
-                                        {(event) => submitDeleteEpisode(item.id, event)}
-                                    >
-                                        -
-                                    </button>
-                                </Grid>
-                            </>
-                        ))}
-
-                    <Grid item xs={6} sm={6} md={6} lg={6} className='mt-2'>
-                        <Box>
-                            <TextField
-                                label="Episode Number"
-                                name="episode_number"
-                                type="text"
-                                fullWidth
-                                onChange={handleAddEpisode}
-                            />
-                             {errorsEpisodeForm.episode_number && (
-                            <p className="text-danger">{errorsEpisodeForm.episode_number}</p>
-                        )}
 
 
-                        </Box>
-                       
-                    </Grid>
-                    <Grid item xs={6} sm={6} md={6} lg={6}>
-                        <Box style={{ width: "100%" }}>
-                            <FormControl
-                                sx={{
-                                    width: {
-                                        xs: '100%', // 100% width on extra-small screens
-                                        sm: '100%', // 100% width on small screens
-                                        md: '100%', // 100% width on medium screens
-                                        lg: '100%', // 100% width on large screens
-                                    }
-                                }}
-                            >
-                                <LocalizationProvider dateAdapter={AdapterDayjs}  >
-                                    <DemoContainer components={['DatePicker']}>
-                                        <DatePicker
-                                            label="Release date of its episodes's"
-                                            name="release_date_of_the_season"
-                                            value={episodeFormData.release_date}
-                                            onChange={handleEpisodeReleaseDate}
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    height: {
-                                                        xs: '48px', // height for extra-small screens
-                                                        sm: '52px', // height for small screens
-                                                        md: '56px', // height for medium screens
-                                                        lg: '62px', // height for large screens
-                                                    },
-                                                    width: {
-                                                        xs: '100%', // 100% width on extra-small screens
-                                                        sm: '100%', // 100% width on small screens
-                                                        md: '640px', // 100% width on medium screens
-                                                        lg: '640px', // 100% width on large screens
-                                                    },
-                                                    borderRadius: {
-                                                        xs: '4px', // border-radius for extra-small screens
-                                                        sm: '5px', // border-radius for small screens
-                                                        md: '6px', // border-radius for medium screens
-                                                        lg: '7px', // border-radius for large screens
-                                                    },
-                                                }
-                                            }}
-                                        />
-                                    </DemoContainer>
-                                </LocalizationProvider>
-                            </FormControl>
-                        </Box>
-                        {errorsEpisodeForm.release_date && (
-                            <p className="text-danger">{errorsEpisodeForm.release_date}</p>
-                        )}
-                    </Grid>
-                </Grid>
+                {preEpisodeData && preEpisodeData.length > 0 ? (
+                    <TableContainer component={Paper} style={{ marginTop: '10px' }}>
+                        <Table sx={{ minWidth: 650 }} aria-label="caption table">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell align='center'>Date of the Streaming</TableCell>
+                                    <TableCell align="center">Name of the platform</TableCell>
+                                    <TableCell align="center"></TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {preEpisodeData.map((row) => (
+                                    <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                        <TableCell align="center">{row.episode_number}</TableCell>
+                                        <TableCell align="center">{row.release_date}</TableCell>
+                                        <TableCell align="center">
+                                            <Button onClick={(event) => submitDeleteEpisode(row.id, event)} variant="outlined" color="error" startIcon={<DeleteIcon style={{ color: '#d32f2f' }} />}>
+                                                Delete
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+
+                                <TableRow>
+                                    <TableCell align="center" colSpan={4}>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={4} sm={4} md={4} lg={4}>
+                                                <Box>
+                                                    <TextField
+                                                        label="Episode Number"
+                                                        name="episode_number"
+                                                        type="number"
+                                                        fullWidth
+                                                        onChange={handleAddEpisode}
+                                                        onKeyDown={handleKeyDown}
+                                                    />
+                                                    {errorsEpisodeForm.episode_number && (
+                                                        <p className="text-danger">{errorsEpisodeForm.episode_number}</p>
+                                                    )}
+
+
+                                                </Box>
+
+                                            </Grid>
+                                            <Grid item xs={4} sm={4} md={4} lg={4}>
+                                                <Box style={{ width: "100%" }}>
+                                                    <FormControl>
+                                                        <LocalizationProvider dateAdapter={AdapterDayjs}  >
+                                                            <DemoContainer components={['DatePicker']}>
+                                                                <DatePicker
+                                                                    label="Release date of episodes's"
+                                                                    name="release_date_of_the_season"
+                                                                    value={episodeFormData.release_date}
+                                                                    onChange={handleEpisodeReleaseDate}
+                                                                    minDate={dayjs('2023-08-01')}
+                                                                    maxDate={dayjs('2024-07-31')}
+                                                                />
+                                                            </DemoContainer>
+                                                        </LocalizationProvider>
+                                                    </FormControl>
+                                                </Box>
+                                                {errorsEpisodeForm.release_date && (
+                                                    <p className="text-danger">{errorsEpisodeForm.release_date}</p>
+                                                )}
+                                            </Grid>
+                                            <Grid item xs={4} sm={4} md={4} lg={4}>
+                                                <Box>
+                                                    <Button variant="contained" color="success" onClick={submitAddEpisode}>
+                                                        Submit and Add More
+                                                    </Button>
+                                                    {errors.is_episode_added && (
+                                                        <p className="text-danger error-handling">{errors.is_episode_added}</p>
+                                                    )}
+                                                </Box>
+                                            </Grid>
+                                        </Grid >
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                            {/* </TableFooter> */}
+                        </Table>
+                    </TableContainer>
+                ) : (
+                    <Grid container spacing={2}>
+                        <Grid item xs={4} sm={4} md={4} lg={4}>
+                            <Box>
+                                <TextField
+                                    label="Episode Number"
+                                    name="episode_number"
+                                    type="number"
+                                    fullWidth
+                                    onChange={handleAddEpisode}
+                                    onKeyDown={handleKeyDown}
+                                />
+                                {errorsEpisodeForm.episode_number && (
+                                    <p className="text-danger">{errorsEpisodeForm.episode_number}</p>
+                                )}
+
+
+                            </Box>
+
+                        </Grid>
+                        <Grid item xs={4} sm={4} md={4} lg={4}>
+                            <Box style={{ width: "100%" }}>
+                                <FormControl>
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}  >
+                                        <DemoContainer components={['DatePicker']}>
+                                            <DatePicker
+                                                label="Release date of its episodes's"
+                                                name="release_date_of_the_season"
+                                                value={episodeFormData.release_date}
+                                                onChange={handleEpisodeReleaseDate}
+                                                minDate={dayjs('2023-08-01')}
+                                                maxDate={dayjs('2024-07-31')}
+                                            />
+                                        </DemoContainer>
+                                    </LocalizationProvider>
+                                </FormControl>
+                            </Box>
+                            {errorsEpisodeForm.release_date && (
+                                <p className="text-danger">{errorsEpisodeForm.release_date}</p>
+                            )}
+                        </Grid>
+                        <Grid item xs={4} sm={4} md={4} lg={4}>
+                            <Box className="d-flex align-items-center  justify-content-end">
+                                <Box>
+                                    <button className='btn btn-success text-capitalize' onClick={submitAddEpisode}>Submit and Add More</button>
+                                    <br />
+                                    {errors.is_episode_added && (
+                                        <p className="text-danger">{errors.is_episode_added}</p>
+                                    )}
+                                </Box>
+                            </Box>
+                        </Grid>
+                    </Grid >
+                )}
+
             </form>
 
-            <Grid className='container'>
-                <Grid item xs={12} sm={12} md={12} lg={12} className='mt-4'>
-                    <Box className="d-flex justify-content-end">
-                        <button className='btn btn-success text-capitalize' onClick={submitAddEpisode}>Submit and Add More</button>
-                    </Box>
 
-                </Grid>
-            </Grid>
+
+
 
         </>
     )

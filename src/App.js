@@ -20,6 +20,7 @@ import Checklogout from './components/Checklogout'
 import Logout from './components/common/Logout'
 import View from './components/ip/IpView/IpView'
 import IpView from './components/ip/IpView/IpView'
+import CmotStepperData from './components/cmot/Season/CmotStepperData'
 
 const App = () => {
   const token = localStorage.getItem('token');
@@ -42,10 +43,18 @@ const App = () => {
           <Route path="/ip" element={<Checksession><StepperData /></Checksession>} />
           <Route path="/ip/:id" element={<Checksession><StepperData /></Checksession>} />
           <Route path="/ip/:id/:ip_step" element={<Checksession><StepperData /></Checksession>} />
-          <Route path="/ip/view/:ip" element={<Checksession><IpView/></Checksession>} />
+          <Route path="/ip/view/:ip" element={<Checksession><IpView /></Checksession>} />
+
+          {/* ott Start */}
           <Route path='/ott' element={<OttStepperData />} />
           <Route path="/ott/:id" element={<Checksession><OttStepperData /></Checksession>} />
           <Route path="/ott/:id/:ip_step" element={<Checksession><OttStepperData /></Checksession>} />
+
+          {/* cmot Start */}
+          <Route path='/cmot' element={<CmotStepperData />} />
+          <Route path="/cmot/:id" element={<Checksession><OttStepperData /></Checksession>} />
+          <Route path="/cmot/:id/:ip_step" element={<Checksession><OttStepperData /></Checksession>} />
+
         </Routes>
       </BrowserRouter>
       {/* <StepperData/> */}

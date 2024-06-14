@@ -1,15 +1,5 @@
-// export const GLOBAL_URL = 'https://192.168.1.205/nfdc-development/api/';
-export const GLOBAL_URL = 'https://192.168.1.235/new/nfdc-development/api/';
-// export const GLOBAL_URL = 'https://192.168.1.91/nfdc-development/api/';
-// export const GLOBAL_URL = 'http://192.168.1.5/nfdc-development/api/';
-// export const GLOBAL_URL = 'http://192.168.1.25/nfdc-development/api/' ;
 
-// 192.168.175.161
-
-
-// export const GLOBAL_URL = 'http://192.168.1.4/new/nfdc-development/api/';
-// export const GLOBAL_URL = 'https://192.168.175.161/new/nfdc-development/api/';
-
+export const GLOBAL_URL = `${process.env.REACT_APP_BASE_URL}/api/`;
 
 
 export const IP_URL = `${GLOBAL_URL}ip/`;

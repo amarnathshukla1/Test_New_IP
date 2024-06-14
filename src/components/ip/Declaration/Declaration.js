@@ -2,20 +2,13 @@ import React, { useEffect, useState } from 'react'
 import ApiClient from '../../common/ApiClient';
 import { useLocation, useParams } from 'react-router-dom';
 
-
-import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
+
 import Typography from '@mui/material/Typography';
 import AlertMessage from '../../AlertMessage';
 
 
-import Success from "../../../images/Success.png"
 import Failure from "../../../images/Failure.png"
 import Pending from "../../../images/Pending.png"
 
@@ -28,11 +21,23 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-const Declaration = ({ formData}) => {
-    
+const Declaration = ({ formData }) => {
+
     const { id = null, response = null } = useParams();
 
-
+    const [checkboxes, setCheckboxes] = useState({
+        checkbox1: false,
+        checkbox2: false,
+        checkbox3: false,
+    });
+    const handleCheckboxChange = (e) => {
+        const { id, checked } = e.target;
+        setCheckboxes({
+            ...checkboxes,
+            [id]: checked,
+        });
+    };
+    const allChecked = Object.values(checkboxes).every(Boolean);
     const { putRequest, getRequest, deleteRequest } = ApiClient();
 
     const [paymentMessage, setPaymentMessage] = useState('');
@@ -115,7 +120,7 @@ const Declaration = ({ formData}) => {
                     "enablePaymentRetry": true,
                     "retry_attempt_count": 2
                 },
-                "callbackUrl": `${process.env.REACT_APP_BASE_URL}/payment-response`
+                "callbackUrl": `${process.env.REACT_APP_SERVER_URL}/payment-response`
             });
         } else {
             console.error('BillDesk script not loaded yet');
@@ -147,87 +152,63 @@ const Declaration = ({ formData}) => {
                 <div className='container'>
                     <div className='row'>
                         <div className='col-sm-12 col-lg-4'>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style={{ backgroundColor: '#AD4172' }} />
-                                <label class="form-check-label" for="flexCheckChecked">
-                                    <p className='text-capitalize' style={{ color: "#3E393A" }}>I/We Have No Objection For Screening of this film for Jury Or any of their Panels, for non-commercial public shows of the film as part of promotion of quality Indian Cinema within India and abroad in festivals/ Special expositions organized/ Supported By the National Film Development Corporation In Any digital format. As well as promotion of the film through the use of film Stills/Posters and Trailers/ Visual Clips. I/We also assure that this no objection for the NFDC will remain valid notwithstanding any rights assigned by Me/Us to any other individual/Organization For screening the Film in any Territory on Commercial/non-Commercial Basis in Future </p>
+                            <div className='form-check'>
+                                <input
+                                    className='form-check-input'
+                                    type='checkbox'
+                                    id='checkbox1'
+                                    checked={checkboxes.checkbox1}
+                                    onChange={handleCheckboxChange}
+                                />
+                                <label className='form-check-label' htmlFor='checkbox1'>
+                                    <p className='text-capitalize' style={{ color: '#3E393A' }}>
+                                        I/We Have No Objection For Screening of this film for Jury Or any of their Panels, for non-commercial public shows of the film as part of promotion of quality Indian Cinema within India and abroad in festivals/ Special expositions organized/ Supported By the National Film Development Corporation In Any digital format. As well as promotion of the film through the use of film Stills/Posters and Trailers/ Visual Clips. I/We also assure that this no objection for the NFDC will remain valid notwithstanding any rights assigned by Me/Us to any other individual/Organization For screening the Film in any Territory on Commercial/non-Commercial Basis in Future
+                                    </p>
                                 </label>
                             </div>
                         </div>
                         <div className='col-sm-12 col-lg-4'>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style={{ backgroundColor: '#AD4172' }} />
-                                <label class="form-check-label" for="flexCheckChecked">
-                                    <p className='text-capitalize' style={{ color: "#3E393A" }}>I/We Declare that I/We Have read the Indian Panorama Regulations And Accept them without reservation. In particular, I/We note the condition of regulations 7.8 Stipulating that My/Our entry form along with all the required material including the DCP/Bluray or DV Cam is Received By The National Film Development Corporation on or before 18.08.2023</p>
+                            <div className='form-check'>
+                                <input
+                                    className='form-check-input'
+                                    type='checkbox'
+                                    id='checkbox2'
+                                    checked={checkboxes.checkbox2}
+                                    onChange={handleCheckboxChange}
+                                />
+                                <label className='form-check-label' htmlFor='checkbox2'>
+                                    <p className='text-capitalize' style={{ color: '#3E393A' }}>
+                                        I/We Declare that I/We Have read the Indian Panorama Regulations And Accept them without reservation. In particular, I/We note the condition of regulations 7.8 Stipulating that My/Our entry form along with all the required material including the DCP/Bluray or DV Cam is Received By The National Film Development Corporation on or before 18.08.2023
+                                    </p>
                                 </label>
                             </div>
                         </div>
                         <div className='col-sm-12 col-lg-4'>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style={{ backgroundColor: '#AD4172' }} />
-                                <label class="form-check-label" for="flexCheckChecked">
-                                    <p className='text-capitalize' style={{ color: "#3E393A" }}>I/We certify that the film entered is not a Dubbed/Revised/Remake/ Re-edited version of a film and has not been submitted earlier.</p>
+                            <div className='form-check'>
+                                <input
+                                    className='form-check-input'
+                                    type='checkbox'
+                                    id='checkbox3'
+                                    checked={checkboxes.checkbox3}
+                                    onChange={handleCheckboxChange}
+                                />
+                                <label className='form-check-label' htmlFor='checkbox3'>
+                                    <p className='text-capitalize' style={{ color: '#3E393A' }}>
+                                        I/We certify that the film entered is not a Dubbed/Revised/Remake/ Re-edited version of a film and has not been submitted earlier.
+                                    </p>
                                 </label>
                             </div>
                         </div>
+
                     </div>
                 </div>
                 <div className='row'>
                     <div className='col-sm-12 col-lg-12'>
-                        <h5>Entry Fees:  {formData.category == 1 ? <span style={{ color: "#973A64", fontSize: "28px", fontWeight: "500" }}>INR 11800/-</span> : <span style={{ color: "#973A64", fontSize: "28px", fontWeight: "500" }}>INR 3540/-</span> }
-                            {/* <span style={{ color: "#973A64", fontSize: "28px", fontWeight: "500" }}>INR 11800/-</span> */} 
+                        <h5>Entry Fees:  {formData.category == 1 ? <span style={{ color: "#973A64", fontSize: "28px", fontWeight: "500" }}>INR 11800/-</span> : <span style={{ color: "#973A64", fontSize: "28px", fontWeight: "500" }}>INR 3540/-</span>}
+                            {/* <span style={{ color: "#973A64", fontSize: "28px", fontWeight: "500" }}>INR 11800/-</span> */}
                         </h5>
                     </div>
                 </div>
-
-                {/* <div className='row'>
-                    <div className='col-sm-12 col-lg-12'>
-                        <p className='text-capitalize' style={{ color: "#615A5B" }}>Payment Mode<span className='text-danger'>*</span></p>
-                    </div>
-                </div> */}
-                {/* <div className='row'>
-                    <div className='col-sm-12 col-lg-12'>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" style={{ backgroundColor: '#813256' }} />
-                            <label class="form-check-label" for="flexRadioDefault1">
-                                UPI
-                            </label>
-                        </div>
-                    </div>
-                    <div className='col-sm-12 col-lg-12'>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" style={{ backgroundColor: '#813256' }} />
-                            <label class="form-check-label" for="flexRadioDefault1">
-                                Credit Card
-                            </label>
-                        </div>
-                    </div>
-                    <div className='col-sm-12 col-lg-12'>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" style={{ backgroundColor: '#813256' }} />
-                            <label class="form-check-label" for="flexRadioDefault1">
-                                Debit Card
-                            </label>
-                        </div>
-                    </div>
-                    <div className='col-sm-12 col-lg-12'>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" style={{ backgroundColor: '#813256' }} />
-                            <label class="form-check-label" for="flexRadioDefault1">
-                                Internet Banking
-                            </label>
-                        </div>
-                        <div className='col-sm-12 col-lg-12'>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" style={{ backgroundColor: '#813256' }} />
-                                <label class="form-check-label" for="flexRadioDefault1">
-                                    QR Code-customed-IFFI
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div> */}
-
 
                 <div className='row mt-4'>
                     <div className='col-sm-12 col-lg-12'>
@@ -237,7 +218,7 @@ const Declaration = ({ formData}) => {
 
 
             </form>
-            <button className='btn btn-success' onClick={processToPay}>Pay & sumit</button>
+            <button className='btn btn-success' onClick={processToPay} disabled={!allChecked}>Pay & Submit</button>
 
             <AlertMessage handleClickOpen={handleClickOpen} setOpen={setOpen} open={open} handleClose={handleClose}
 

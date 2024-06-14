@@ -12,10 +12,6 @@
 }
 
 
-.welcome_details{
-    margin-top: 50px !important;
-}
-
 .log_in_now{
     text-decoration: none;
     color: black;
@@ -153,7 +149,6 @@
 }
 
 .welcome {
-    margin-top: 130px !important;
     color: #973A64;
     font-weight: 800;
     font-size: 55px;
@@ -240,7 +235,11 @@
     }
   }
 
-
+  @media only screen and (max-width: 767px) {
+    .mob-IP{
+        display: none;
+    }
+  }
 
 
 

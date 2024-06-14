@@ -1,0 +1,384 @@
+* {
+    font-family: "Sora", sans-serif;
+}
+
+.css-11lq3yg-MuiGrid-root {
+    height: 100%;
+    overflow: hidden;
+}
+
+.css-1czm7y9-MuiGrid-root {
+    height: 100%;
+}
+
+.css-pzatnh-MuiGrid-root {
+    height: 100%;
+    overflow: auto;
+}
+
+/* left side-bar */
+.logo {
+    width: 114px;
+    height: 70px;
+    margin: auto;
+}
+
+.log_out_btn {
+    text-align: center;
+    margin-top: 80%;
+}
+
+/* Right header Start */
+.left_first_header hr {
+    border: 1px solid rgba(151, 58, 100, 1);
+}
+
+.firstHead {
+    display: flex;
+    margin: 10px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.burger {
+    display: none;
+}
+
+.headimg {
+    width: 92px;
+    height: 50px;
+    display: block;
+}
+
+.sec_head {
+    box-shadow: 4px 0px 12px -5px rgba(0, 0, 0, 0.25);
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+}
+
+.sec_head h6 {
+    font-size: 32px;
+    font-weight: 400;
+}
+
+.sec_head h6 {
+    font-size: 32px;
+    font-weight: 400;
+}
+
+/* VerticalTabs.css */
+.vertical-tabs-container {
+    flex-grow: 1;
+    background-color: white;
+    display: flex;
+    height: 224px;
+}
+
+button {
+    font-family: Inter !important;
+}
+
+.vertical-tabpanel {
+    padding: 16px;
+}
+
+.css-10d9dml-MuiTabs-indicator {
+    position: unset !important;
+    background-color: unset !important;
+}
+
+.deshbord-leftSide {
+    height: 100%;
+    background: linear-gradient(225deg, #632340 0%, rgba(207, 82, 138, 0) 100%),
+        linear-gradient(135deg, #CF528A 0%, rgba(99, 35, 64, 0) 100%),
+        linear-gradient(135deg, rgba(225, 137, 172, 0) 0%, #E189AC 100%),
+        linear-gradient(225deg, rgba(99, 35, 64, 0.2) 0%, #E189AC 100%);
+
+}
+
+/* .css-1cgx7kx-MuiTabs-scroller {
+        height: 100vh;
+    } */
+
+.css-lfwcke-MuiTabs-flexContainer button {
+    color: white;
+}
+
+.css-1h9z7r5-MuiButtonBase-root-MuiTab-root.Mui-selected {
+    background-color: rgba(255, 255, 255, 0.2);
+    margin: 10px;
+    border-radius: 6px;
+    color: white !important;
+}
+
+.css-35zqo5-MuiTabs-root .MuiTabs-scrollButtons {
+    display: none !important;
+}
+
+.card-container {
+    display: grid;
+    gap: 12px;
+    justify-items: center;
+    /* Center items horizontally */
+}
+
+/* Default: 3 columns on large screens */
+.card-container {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+
+
+.card_con {
+    padding: 12px 20px;
+    /* width: 363.33px; */
+    /* height: 296px; */
+    border-radius: 8px;
+    opacity: 0px;
+    border: 1px solid rgba(0, 0, 0, 1);
+    background-color: white;
+    /* padding: 16px; */
+    /* border-radius: 8px; */
+    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+    width: 100%;
+    height: auto;
+    /* Ensure the card takes the full width of the grid cell */
+    box-sizing: border-box;
+}
+
+.card_con .title {
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+
+    font-family: Sora;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 80px;
+    /* text-align: left; */
+    display: flex;
+    gap: 25px;
+    align-items: center;
+}
+
+.card_con .listView {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px 0;
+}
+
+.card_con .listView li {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    align-items: center;
+}
+
+
+.card_con .title span {
+    width: 40px;
+    height: 40px;
+    border-radius: 40px;
+    background: rgba(79, 209, 217, 1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+}
+
+
+.listView li h5 {
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 32px;
+    letter-spacing: 0.05em;
+    text-align: left;
+    margin-bottom: 0;
+    margin-top: 0;
+
+}
+
+.listView li h6 {
+    /* //styleName: Heading/h5; */
+    font-family: Sora;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 25px;
+    text-align: left;
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+.button_con {
+    display: flex;
+    justify-content: end;
+    gap: 12px;
+    /* margin-top: 25px; */
+    margin-top: auto;
+}
+
+.button_con button {
+    border: 1px solid rgba(60, 60, 60, 1);
+    border-radius: 4px;
+    padding: 8px 24px;
+    font-family: Sora;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 24px;
+    letter-spacing: 0.005em;
+    background: #fff;
+    color: black;
+    box-shadow: unset;
+    min-height: unset;
+}
+
+.button_con button:hover {
+    background: white;
+}
+
+.top_head h3 {
+    font-family: Poppins;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 48px;
+    text-align: center;
+    margin-bottom: 32px;
+
+}
+
+.button_con button:last-child {
+    border: 1px solid rgba(60, 187, 205, 1);
+    background: rgba(60, 187, 205, 1);
+    color: #fff;
+    font-size: 20px;
+}
+
+.empty_crd h4 {
+    font-family: Sora;
+    text-align: center;
+    font-weight: 400;
+    font-size: 24px;
+}
+
+.add_button {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.add_button button {
+    background-color: rgba(99, 35, 64, 1);
+    padding: 12px 24px 12px 24px;
+}
+
+.add_button button:hover {
+    background-color: rgba(99, 35, 64, 1);
+}
+
+
+/* MediaQuery */
+/* 2 columns on tablet view (768px - 1200px) */
+@media (max-width: 1200px) {
+    .card-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* 1 column on mobile view (up to 768px) */
+@media (max-width: 760px) {
+    .log_out_btn {
+        margin-top: 50%;
+    }
+
+    .card-container {
+        grid-template-columns: 1fr;
+    }
+
+    .button_con {
+        justify-content: center;
+    }
+
+    .css-1czm7y9-MuiGrid-root {
+        display: none;
+    }
+
+    .css-pzatnh-MuiGrid-root {
+        flex-basis: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .sec_head h6 {
+        font-size: 20px;
+    }
+
+    .sec_head p {
+        font-size: 15px;
+    }
+
+    .top_head h3 {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+
+    .card_con .title {
+        line-height: 36px;
+    }
+
+    .listView li h5 {
+        font-size: 14px;
+        line-height: 25px;
+    }
+
+    .listView li h6 {
+        font-size: 16px;
+    }
+
+    .button_con button {
+        line-height: 14px;
+
+        &:last-child {
+            font-size: 16px;
+        }
+    }
+
+    .headimg {
+        width: 60px;
+        height: 40px;
+        display: block;
+    }
+
+    .burger {
+        display: block;
+
+        & button {
+            color: black;
+        }
+    }
+
+    .css-4t3x6l-MuiPaper-root-MuiDrawer-paper {
+        background: linear-gradient(225deg, #632340 0%, rgba(207, 82, 138, 0) 100%),
+            linear-gradient(135deg, #CF528A 0%, rgba(99, 35, 64, 0) 100%),
+            linear-gradient(135deg, rgba(225, 137, 172, 0) 0%, #E189AC 100%),
+            linear-gradient(225deg, rgba(99, 35, 64, 0.2) 0%, #E189AC 100%);
+        color: white !important;
+    }
+
+    .css-cveggr-MuiListItemIcon-root {
+        & .css-i4bv87-MuiSvgIcon-root {
+            color: white;
+        }
+    }
+
+    .empty_crd h4 {
+        font-size: 15px;
+    }
+
+    .add_button button {
+        padding: 10px 8px 10px 10px;
+    }
+
+}
+.css-mhc70k-MuiGrid-root{
+    align-items: center;
+}

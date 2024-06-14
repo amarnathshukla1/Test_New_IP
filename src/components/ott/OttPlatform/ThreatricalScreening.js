@@ -12,21 +12,48 @@ import dayjs from 'dayjs';
 import ApiClient from '../../common/ApiClient';
 import { useEffect } from 'react';
 import DeleteDialog from '../../ip/DeleteDialog';
-const ThreatricalScreening = () => {
+import { useParams } from 'react-router-dom';
 
+import styles from "../../ott/OttPlatform/Stream.module.css"
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import Button from '@mui/material/Button';
+import DeleteIcon from '@mui/icons-material/Delete';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+
+
+const ThreatricalScreening = ({ setFormDataMain, setOttPlatformErrors, errors, formDataMain }) => {
+
+    const { id = null } = useParams();
     const { putRequest, getRequest, deleteRequest } = ApiClient();
     const [errorsForm, setErrorsForm] = useState({});
     const [preData, setPreData] = useState([]);
     const [formData, setformData] = React.useState({
-        ott_form_id: '1',
+        ott_form_id: id,
         festival_name: "",
         date_of_festival: null,
         address: "",
     });
     const loadData = async () => {
-        const preData = await getRequest(`ott/1/threatrical-screening`);
+        const preData = await getRequest(`ott/${id}/threatrical-screening`);
         const data = preData.data;
+        if (data.length > 0) {
 
+            setFormDataMain(prevData => ({
+                ...prevData,
+                is_threatical_screening_added: 1
+            }));
+            setOttPlatformErrors({
+                ...errors,
+                is_threatical_screening_added: null
+            })
+        } else {
+            setFormDataMain(prevData => ({
+                ...prevData,
+                is_threatical_screening_added: null
+            }))
+        }
         //  if (data && data.length < 5) setShowAddNewEntry(true)
         setPreData(data);
     }
@@ -37,9 +64,9 @@ const ThreatricalScreening = () => {
 
     const validateForm = () => {
         const newErrors = {};
-        if (!formData.festival_name) newErrors.festival_name = 'Festival name is required';
-        if (!formData.date_of_festival) newErrors.date_of_festival = 'Date of festival is required';
-        if (!formData.address) newErrors.address = 'Address is required';
+        if (!formData.festival_name) newErrors.festival_name = 'Enter festival name';
+        if (!formData.date_of_festival) newErrors.date_of_festival = 'Select date of festival';
+        if (!formData.address) newErrors.address = 'Enter address of the festival';
         setErrorsForm(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -69,7 +96,7 @@ const ThreatricalScreening = () => {
         e.preventDefault();
 
         if (!validateForm()) return;
-        const id = 1;
+
         try {
 
             const response = await putRequest(`ott/${id}/threatrical-screening`, formData)
@@ -85,7 +112,7 @@ const ThreatricalScreening = () => {
                 festival_name: "",
                 date_of_festival: null,
                 address: "",
-                ott_form_id: 1,
+                ott_form_id: id,
             });
             loadData();
             alert('Form has submitted successfully!');
@@ -112,7 +139,7 @@ const ThreatricalScreening = () => {
     };
     const submitDelete = async (e) => {
         e.preventDefault();
-        const id = 1;
+
         try {
             const response = await deleteRequest(`ott/${id}/threatrical-screening/${prepareDelete}`, formData)
 
@@ -131,134 +158,167 @@ const ThreatricalScreening = () => {
 
     return (
         <>
-            {
-                preData.map((item, index) => (
+            {preData && preData.length > 0 ? (
+                <TableContainer component={Paper} style={{ marginTop: '10px' }}>
+                    <Table sx={{ minWidth: 650 }} aria-label="caption table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell align='center'>Name of the Festival/Screening</TableCell>
+                                <TableCell align="center">Date of the Festival/Screening</TableCell>
+                                <TableCell align="center">Address of the festival</TableCell>
+                                <TableCell align="center"></TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {preData.map((row) => (
+                                <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                    <TableCell align="center">{row.festival_name}</TableCell>
+                                    <TableCell align="center">{row.date_of_festival}</TableCell>
+                                    <TableCell align="center">{row.address}</TableCell>
+                                    <TableCell align="center">
+                                        <Button value={row.id} onClick={handleDeleteOpen} variant="outlined" color="error" startIcon={<DeleteIcon style={{ color: '#d32f2f' }} />}>
+                                            Delete
+                                        </Button>
+                                        <DeleteDialog open={openDeleteConfirm} handleClose={handleDeleteClose} handleDelete={submitDelete} />
+                                    </TableCell>
+                                </TableRow>
+                            ))}
 
-                    <>
-                        <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                            Name of the festival:
-                        </Grid>
-                        <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                            {item.festival_name}
-                        </Grid>
-                        <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                            Date of the festival :
-                        </Grid>
-                        <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                            {item.date_of_festival}
-                        </Grid>
-                        <Grid item xs={1} sm={1} md={1} lg={1} className='mt-2'>
-                            Address of the festival:
-                        </Grid>
-                        <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                            {item.address}
-                        </Grid>
-                        <Grid item xs={1} sm={1} md={1} lg={1} className='mt-2'>
-                            <button className='btn btn-danger'
-                                // onClick=
-                                // {(event) => submitDelete(item.id, event)}
-                                value={item.id}
-                                onClick={handleDeleteOpen}
-                            >
-                                -
-                            </button>
-                            <DeleteDialog open={openDeleteConfirm} handleClose={handleDeleteClose} handleDelete={submitDelete} />
+                            <TableRow>
+                                <TableCell align="center" colSpan={4}>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={3} sm={3} md={3} lg={3}>
+                                            <Box>
+                                                <TextField
+                                                    name="festival_name"
+                                                    label="Name of the Festival/Screening"
+                                                    type="text"
+                                                    fullWidth
+                                                    variant="outlined"
+                                                    onChange={handleFormData}
+                                                />
+                                            </Box>
+                                            {errorsForm.festival_name && (
+                                                <p className="text-danger">{errorsForm.festival_name}</p>
+                                            )}
 
-                        </Grid>
-                    </>
-                ))}
-            <Grid item xs={12} sm={12} md={6} lg={6}>
-                <Box>
-                    <TextField
-                        name="festival_name"
-                        label="Name of the Festival/Screening"
-                        type="text"
-                        fullWidth
-                        onChange={handleFormData}
-                    />
-                </Box>
-                {errorsForm.festival_name && (
+                                        </Grid>
+                                        <Grid item xs={3} sm={3} md={3} lg={3}>
+                                            <Box style={{ width: "100%" }}>
+                                                <FormControl>
+                                                    <LocalizationProvider dateAdapter={AdapterDayjs}  >
+                                                        <DemoContainer components={['DatePicker']}>
+                                                            <DatePicker
+                                                                label="Date of Festival/Screening"
+                                                                name="date_of_festival"
+                                                                value={formData.date_of_festival}
+                                                                onChange={handleReleaseDate}
+                                                                minDate={dayjs('2023-08-01')}
+                                                                maxDate={dayjs('2024-07-31')}
+                                                            />
+                                                        </DemoContainer>
+                                                    </LocalizationProvider>
+                                                </FormControl>
+                                                {errorsForm.date_of_festival && (
+                                                    <p className="text-danger">{errorsForm.date_of_festival}</p>
+                                                )}
+                                            </Box>
+                                        </Grid>
+                                        <Grid item xs={3} sm={3} md={3} lg={3}>
+                                            <Box>
+                                                <TextField
+                                                    name="address"
+                                                    label="Address of the festival"
+                                                    type="text"
+                                                    fullWidth
+                                                    onChange={handleFormData}
+                                                />
+                                            </Box>
+                                            {errorsForm.address && (
+                                                <p className="text-danger">{errorsForm.address}</p>
+                                            )}
+                                        </Grid>
+                                        <Grid item xs={3} sm={3} md={3} lg={3}>
+                                            <Box>
+                                                <Button variant="contained" color="success" onClick={submitForm}>
+                                                    Submit and Add More
+                                                </Button>
+                                                {errors.is_threatical_screening_added && (
+                                                    <p className="text-danger error-handling">{errors.is_threatical_screening_added}</p>
+                                                )}
+                                            </Box>
+                                        </Grid>
+                                    </Grid>
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                        {/* </TableFooter> */}
+                    </Table>
+                </TableContainer>
+            ) : (
+                <Grid container spacing={2}>
+                    <Grid item xs={3} sm={3} md={3} lg={3}>
+                        <Box>
+                            <TextField
+                                name="festival_name"
+                                label="Name of the Festival/Screening"
+                                type="text"
+                                fullWidth
+                                onChange={handleFormData}
+                            />
+                        </Box>
+                        {errorsForm.festival_name && (
                             <p className="text-danger">{errorsForm.festival_name}</p>
                         )}
 
-            </Grid>
-
-
-            <Grid item xs={12} sm={12} md={6} lg={6}>
-                <Box style={{ width: "100%" }}>
-                    <FormControl
-                        sx={{
-                            width: {
-                                xs: '100%',
-                                sm: '100%',
-                                md: '100%',
-                                lg: '100%',
-                            }
-                        }}
-                    >
-                        <LocalizationProvider dateAdapter={AdapterDayjs}  >
-                            <DemoContainer components={['DatePicker']}>
-                                <DatePicker
-                                    label="Date of the Festival/Screening"
-                                    name="date_of_festival"
-                                    value={formData.date_of_festival}
-                                    onChange={handleReleaseDate}
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            height: {
-                                                xs: '48px',
-                                                sm: '52px',
-                                                md: '56px',
-                                                lg: '62px',
-                                            },
-                                            width: {
-                                                xs: '100%',
-                                                sm: '100%',
-                                                md: '640px',
-                                                lg: '640px',
-                                            },
-                                            borderRadius: {
-                                                xs: '4px',
-                                                sm: '5px',
-                                                md: '6px',
-                                                lg: '7px',
-                                            },
-                                        }
-                                    }}
-                                />
-                            </DemoContainer>
-                        </LocalizationProvider>
-                    </FormControl>
-                    {errorsForm.date_of_festival && (
-                            <p className="text-danger">{errorsForm.date_of_festival}</p>
-                        )}
-                </Box>
-            </Grid>
-
-
-            <Grid item xs={12} sm={12} md={6} lg={6}>
-                <Box>
-                    <TextField
-                        name="address"
-                        label="Address of the festival"
-                        type="text"
-                        fullWidth
-                        onChange={handleFormData}
-                    />
-                </Box>
-                {errorsForm.address && (
+                    </Grid>
+                    <Grid item xs={3} sm={3} md={3} lg={3}>
+                        <Box style={{ width: "100%" }}>
+                            <FormControl>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}  >
+                                    <DemoContainer components={['DatePicker']}>
+                                        <DatePicker
+                                            label="Date of Festival/Screening"
+                                            name="date_of_festival"
+                                            value={formData.date_of_festival}
+                                            onChange={handleReleaseDate}
+                                            minDate={dayjs('2023-08-01')}
+                                            maxDate={dayjs('2024-07-31')}
+                                        />
+                                    </DemoContainer>
+                                </LocalizationProvider>
+                            </FormControl>
+                            {errorsForm.date_of_festival && (
+                                <p className="text-danger">{errorsForm.date_of_festival}</p>
+                            )}
+                        </Box>
+                    </Grid>
+                    <Grid item xs={3} sm={3} md={3} lg={3}>
+                        <Box>
+                            <TextField
+                                name="address"
+                                label="Address of the festival"
+                                type="text"
+                                fullWidth
+                                onChange={handleFormData}
+                            />
+                        </Box>
+                        {errorsForm.address && (
                             <p className="text-danger">{errorsForm.address}</p>
                         )}
-            </Grid>
-
-
-            <Grid item xs={12} sm={12} md={12} lg={12}>
-                <Box className='d-flex align-items-center justify-content-end'>
-                    <Box>
-                        <button className='btn btn-success' onClick={submitForm}>Submit and Add More</button>
-                    </Box>
-                </Box>
-            </Grid>
+                    </Grid>
+                    <Grid item xs={3} sm={3} md={3} lg={3}>
+                        <Box>
+                            <Button variant="contained" color="success" onClick={submitForm}>
+                                Submit and Add More
+                            </Button>
+                            {errors.is_threatical_screening_added && (
+                                <p className="text-danger error-handling">{errors.is_threatical_screening_added}</p>
+                            )}
+                        </Box>
+                    </Grid>
+                </Grid>
+            )}
         </>
     )
 }

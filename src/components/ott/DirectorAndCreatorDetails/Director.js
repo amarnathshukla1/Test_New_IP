@@ -15,37 +15,85 @@ import DeleteDialog from '../../ip/DeleteDialog';
 
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-const Director = ({ proms = {} }) => {
+import { useParams } from 'react-router-dom';
 
+import { getRequestGlobal } from "../../../API/global"
+import InputLabel from '@mui/material/InputLabel';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import Button from '@mui/material/Button';
+import DeleteIcon from '@mui/icons-material/Delete';
+
+const Director = ({ proms = {}, setFormDataMain, setDirectorCreatorErrors, errors }) => {
+    const { id = null } = useParams();
     const { putRequest, getRequest, deleteRequest } = ApiClient();
     const [errorsForm, setErrorsForm] = useState({});
     const [preData, setPreData] = useState([]);
+    const [countryId, setCountryId] = useState({})
     const [formData, setformData] = React.useState({
         name: '',
         country_id: null,
         phone: null,
         email: null,
         website: null,
-        ott_form_id: '1',
+        ott_form_id: id,
     });
     const loadData = async () => {
-        const preData = await getRequest(`ott/1/creator/type/${proms.type}`);
+        const preData = await getRequest(`ott/${id}/creator/type/${proms.type}`);
         const data = preData.data;
 
-        //  if (data && data.length < 5) setShowAddNewEntry(true)
+        if (proms.type == 1) {
+            if (data.length > 0) {
+
+                setFormDataMain(prevData => ({
+                    ...prevData,
+                    is_creator_added: 1
+                }));
+                setDirectorCreatorErrors({
+                    ...errors,
+                    is_creator_added: null
+                })
+            } else {
+
+                setFormDataMain(prevData => ({
+                    ...prevData,
+                    is_creator_added: null
+                }));
+            }
+        } else if (proms.type == 2) {
+            if (data.length > 0) {
+
+                setFormDataMain(prevData => ({
+                    ...prevData,
+                    is_director_added: 1
+                }));
+                setDirectorCreatorErrors({
+                    ...errors,
+                    is_director_added: null
+                })
+            } else {
+
+                setFormDataMain(prevData => ({
+                    ...prevData,
+                    is_director_added: null
+                }));
+            }
+        }
+
+
+
+
         setPreData(data);
     }
     useEffect(() => {
         loadData();
-
     }, []);
 
     const validateForm = () => {
         const newErrors = {};
-        if (!formData.name) newErrors.name = 'Competition name is required';
-        if (!formData.country_id) newErrors.country_id = 'form id  is missing';
-        if (!formData.phone) newErrors.phone = 'Details is required';
-        if (!formData.email) newErrors.email = 'Release Date is required';
+        if (!formData.name) newErrors.name = 'Enter name';
+        if (!formData.country_id) newErrors.country_id = 'Select nationality';
+        if (!formData.phone) newErrors.phone = 'Enter phone number';
+        if (!formData.email) newErrors.email = 'Enter email id';
         setErrorsForm(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -57,6 +105,23 @@ const Director = ({ proms = {} }) => {
         }));
         errorsForm[name] = ""
         setErrorsForm(errorsForm);
+
+        const newValue = value.replace(/\D/g, '').slice(0, 10);
+        if (name == "phone") {
+            setformData(prevData => ({
+                ...prevData,
+                [name]: newValue
+            }));
+        } else {
+            setformData(prevData => ({
+                ...prevData,
+                [name]: value
+            }));
+        }
+
+        if (name === 'email') {
+            validateDirectorEmail(value);
+        }
 
     };
     const handleCompetitionDate = (e) => {
@@ -75,7 +140,7 @@ const Director = ({ proms = {} }) => {
         e.preventDefault();
 
         if (!validateForm()) return;
-        const id = 1;
+
         try {
 
             const response = await putRequest(`ott/${id}/creator/type/${proms.type}`, formData)
@@ -93,7 +158,7 @@ const Director = ({ proms = {} }) => {
                 phone: null,
                 email: null,
                 website: null,
-                ott_form_id: '1',
+                ott_form_id: id,
             });
             loadData();
             alert('Form has submitted successfully!');
@@ -120,7 +185,7 @@ const Director = ({ proms = {} }) => {
     };
     const submitDelete = async (e) => {
         e.preventDefault();
-        const id = 1;
+
         try {
             const response = await deleteRequest(`ott/${id}/creator/${prepareDelete}`, formData)
 
@@ -137,170 +202,216 @@ const Director = ({ proms = {} }) => {
         setOpenDeleteConfirm(false);
     };
 
+    useEffect(() => {
+        getRequestGlobal('country', {})
+            .then((data) => {
+                console.log({ data })
+                setCountryId(data.data)
+            })
+            .catch((error) => {
+            });
+
+    }, []);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        console.log("")
+        setformData({
+            ...formData,
+            [name]: value
+        });
+        errorsForm[name] = ""
+        setErrorsForm(errorsForm);
+
+    };
+
+    const handleKeyDown = (event) => {
+        // Prevent the letter 'e', '+', '-', '.' and other non-numeric characters
+        if (['e', 'E', '+', '-', '.'].includes(event.key)) {
+            event.preventDefault();
+        }
+    };
+
+    const validateDirectorEmail = (email) => {
+        const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+        if (!emailRegex.test(email)) {
+            setErrorsForm({
+                ...errorsForm,
+                email: 'Invalid email format'
+            });
+        } else {
+            setErrorsForm({
+                ...errorsForm,
+                email: ''
+            });
+        }
+    };
+
     return (
         <>
-            {
-                preData.map((item, index) => (
+            {/* {preData && preData.length > 0 ? ( */}
+            <TableContainer component={Paper} style={{ marginTop: '10px' }}>
+                <Table sx={{ minWidth: 650 }} aria-label="caption table">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell align='center'>Name</TableCell>
+                            <TableCell align="center">country</TableCell>
+                            <TableCell align="center">Phone</TableCell>
+                            <TableCell align="center">Email</TableCell>
+                            <TableCell align="center">Website</TableCell>
+                            <TableCell align="center"></TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {preData.map((row) => (
+                            <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                <TableCell align="center">{row.name}</TableCell>
+                                <TableCell align="center">
+                                    {/* {row.country_id} */}
+                                    {countryId[row.country_id] || ''}
+                                    </TableCell>
+                                <TableCell align="center">{row.phone}</TableCell>
+                                <TableCell align="center">{row.email}</TableCell>
+                                <TableCell align="center">{row.website}</TableCell>
+                                <TableCell align="center">
+                                    <Button value={row.id} onClick={handleDeleteOpen} variant="outlined" color="error" startIcon={<DeleteIcon style={{ color: '#d32f2f' }} />}>
+                                        Delete
+                                    </Button>
+                                    <DeleteDialog open={openDeleteConfirm} handleClose={handleDeleteClose} handleDelete={submitDelete} />
+                                </TableCell>
+                            </TableRow>
+                        ))}
 
-                    <>
-                        {(index == 0) ?
+                        <TableRow>
+                            <TableCell align="center" colSpan={6}>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={2} sm={2} md={2} lg={2}>
+                                        <Box>
+                                            <TextField
+                                                label={(proms.type == 1) ? `Name of the creator's` : `Name of the director's`}
+                                                type="text"
+                                                fullWidth
+                                                name="name"
+                                                onChange={handleFormData}
+                                            />
+                                        </Box>
+                                        {errorsForm.name && (
+                                            <p className="text-danger">{errorsForm.name}</p>
+                                        )}
+                                    </Grid>
+                                    <Grid item xs={2} sm={2} md={2} lg={2}>
+                                        <Box>
+                                            <FormControl fullWidth>
+                                                <InputLabel id="demo-simple-select-label">Nationality</InputLabel>
+                                                <Select
+                                                    labelId="demo-simple-select-label"
+                                                    id="demo-simple-select"
+                                                    onChange={handleFormData}
+                                                    name="country_id"
+                                                    label="Nationality"
+                                                    value={formData.country_id || ''}
+                                                >
+                                                    <MenuItem key="0" value="">Nationality</MenuItem>
 
-                            <>
-                                <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                                    Name :
+                                                    {Object.entries(countryId).map(([key, value]) => (
+                                                        <MenuItem key={key} value={key}>
+                                                            {value}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                            {errorsForm.country_id && (
+                                                <p className="text-danger">{errorsForm.country_id}</p>
+                                            )}
+
+                                        </Box>
+
+                                    </Grid>
+                                    <Grid item xs={2} sm={2} md={2} lg={2}>
+                                        <Box className='d-flex align-items-center'>
+                                            <TextField
+                                                variant="outlined"
+                                                type='number'
+                                                fullWidth
+                                                label="Number"
+                                                name="phone"
+                                                value={formData.phone}
+                                                inputProps={{ maxLength: 10 }}
+                                                InputProps={{
+                                                    style: {
+                                                        border: "1px",
+                                                        borderRadius: "5px",
+                                                    },
+                                                }}
+                                                className="input_border"
+                                                onChange={handleFormData}
+                                                onKeyDown={handleKeyDown}
+                                            />
+
+                                        </Box>
+                                        {errorsForm.phone && (
+                                            <p className="text-danger">{errorsForm.phone}</p>
+                                        )}
+                                    </Grid>
+                                    <Grid item xs={2} sm={2} md={2} lg={2}>
+                                        <TextField
+                                            variant="outlined"
+                                            fullWidth
+                                            placeholder='Email ID'
+                                            name="email"
+                                            InputProps={{
+                                                style: {
+                                                    border: "1px",
+                                                    borderRadius: "5px",
+                                                },
+                                            }}
+                                            className="input_border"
+                                            onChange={handleFormData}
+                                        />
+                                        {errorsForm.email && (
+                                            <p className="text-danger">{errorsForm.email}</p>
+                                        )}
+                                    </Grid>
+                                    <Grid item xs={2} sm={2} md={2} lg={2}>
+                                        <TextField
+                                            variant="outlined"
+                                            fullWidth
+                                            placeholder='Website'
+                                            name="website"
+                                            onChange={handleFormData}
+                                            InputProps={{
+                                                style: {
+                                                    border: "1px",
+                                                    borderRadius: "5px",
+                                                },
+                                            }}
+                                            className="input_border"
+
+                                        />
+                                    </Grid>
+                                    <Grid item xs={2} sm={2} md={2} lg={2}>
+                                        <Box>
+                                            <Button variant="contained" color="success" onClick={submitForm}>
+                                                Submit & Add 
+                                            </Button>
+                                            {proms.type == 1 && errors.is_creator_added && (
+                                                <p className="text-danger error-handling">{errors.is_creator_added}</p>
+                                            )}
+                                            {proms.type == 2 && errors.is_director_added && (
+                                                <p className="text-danger error-handling">{errors.is_director_added}</p>
+                                            )}
+                                        </Box>
+                                    </Grid>
                                 </Grid>
-                                <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                                    country :
-                                </Grid>
-                                <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                                    Phone:
-                                </Grid>
-                                <Grid item xs={3} sm={3} md={3} lg={3} className='mt-2'>
-                                    Email:
-                                </Grid>
-                                <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                                    Website:
-                                </Grid>
-                            </>
-                            : ''
-                        }
-                        <>
-                            <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                                {item.name}
-                            </Grid>
-                            <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                                {item.country_id}
-                            </Grid>
-                            <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                                {item.phone}
-                            </Grid>
-                            <Grid item xs={3} sm={3} md={3} lg={3} className='mt-2'>
-                                {item.email}
-                            </Grid>
-                            <Grid item xs={2} sm={2} md={2} lg={2} className='mt-2'>
-                                {item.website}
-                            </Grid>
-                            <Grid item xs={1} sm={1} md={1} lg={1} className='mt-2'>
-                                <button className='btn btn-danger'
-                                    // onClick=
-                                    // {(event) => submitDelete(item.id, event)}
-                                    value={item.id}
-                                    onClick={handleDeleteOpen}
-                                >
-                                    -
-                                </button>
-                                <DeleteDialog open={openDeleteConfirm} handleClose={handleDeleteClose} handleDelete={submitDelete} />
-
-                            </Grid>
-                        </>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                    {/* </TableFooter> */}
+                </Table>
+            </TableContainer>
+            {/* )} */}
 
 
-                    </>
-                ))}
-            <Grid item xs={12} sm={12} md={6} lg={6}>
-                <Box>
-                    <TextField
-                        label={(proms.type == 1) ? `Name of the creator's` : `Name of the director's`}
-                        type="text"
-                        fullWidth
-                        name="name"
-                        onChange={handleFormData}
-                    />
-                </Box>
-            </Grid>
-            <Grid item xs={12} sm={12} md={6} lg={6}>
-                <Box>
-                    <TextField
-                        label="Nationality"
-                        type="text"
-                        fullWidth
-                        name="country_id"
-                        onChange={handleFormData}
-                    />
-                </Box>
-            </Grid>
-            <Grid item xs={12} sm={12} md={6} lg={6}>
-                <Box className='d-flex align-items-center'>
-                    <FormControl
-                        //  sx={{ m: 1, minWidth: 120 }}>
-                        sx={{ minWidth: 120 }}
-                        style={{ border: "1px", borderRadius: "5px" }}
-                    >
-                        <Select
-                            displayEmpty
-                            inputProps={{ 'aria-label': 'Without label', border: "1px", borderRadius: "5px", }}
-                        // InputProps={{
-                        //   style: {
-                        //     border: "1px solid #CF528A",
-                        //     borderRadius: "5px",
-                        //   },
-                        // }}
-                        >
-                            <MenuItem value="">
-                                +91
-                            </MenuItem>
-                            <MenuItem value={10}>Ten</MenuItem>
-                            <MenuItem value={20}>Twenty</MenuItem>
-                            <MenuItem value={30}>Thirty</MenuItem>
-                        </Select>
-                    </FormControl>
-                    <TextField
-                        variant="outlined"
-                        type='number'
-                        fullWidth
-                        placeholder='Number'
-                        name="phone"
-                        InputProps={{
-                            style: {
-                                border: "1px",
-                                borderRadius: "5px",
-                            },
-                        }}
-                        className="input_border"
-                        onChange={handleFormData}
-                    />
-                </Box>
-            </Grid>
-            <Grid item xs={12} sm={12} md={6} lg={6}>
-                <TextField
-                    variant="outlined"
-                    fullWidth
-                    placeholder='Email ID'
-                    name="email"
-                    InputProps={{
-                        style: {
-                            border: "1px",
-                            borderRadius: "5px",
-                        },
-                    }}
-                    className="input_border"
-                    onChange={handleFormData}
-                />
-            </Grid>
-            <Grid item xs={12} sm={12} md={6} lg={6}>
-                <TextField
-                    variant="outlined"
-                    fullWidth
-                    placeholder='Website'
-                    name="website"
-                    onChange={handleFormData}
-                    InputProps={{
-                        style: {
-                            border: "1px",
-                            borderRadius: "5px",
-                        },
-                    }}
-                    className="input_border"
-
-                />
-            </Grid>
-            <Grid item xs={12} sm={12} md={12} lg={12}>
-                <Box className='d-flex align-items-center justify-content-end'>
-                    <Box>
-                        <button className='btn btn-success' onClick={submitForm}>Submit and Add More</button>
-                    </Box>
-                </Box>
-            </Grid>
         </>
     )
 }

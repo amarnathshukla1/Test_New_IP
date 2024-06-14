@@ -83,34 +83,69 @@ const CbfcCertification = ({ formData, setFormData, errors, setCbfcErrors }) => 
 
 
   const [selectedCbfcFile, setSelectedCbfcFile] = useState();
-  const handleFileCbfcChange = (event) => {
-    setSelectedCbfcFile(event.target.files[0]);
-    const file = event.target.files[0];
+  const [error, setError] = useState('');
 
-    console.log(file, "file");
-    setFormData((prevState) => ({
-      ...prevState,
-      file_cbfc_certificate: file,
-      is_file_cbfc_certificate: 1,
-    }));
-    // errors[name] = ""
-    // setCbfcErrors(errors);
+  const handleFileCbfcChange = (event) => {
+    const file = event.target.files[0];
+    
+    if (file && file.type === 'application/pdf') {
+      setSelectedCbfcFile(file);
+      setError('');
+      setFormData((prevState) => ({
+        ...prevState,
+        file_cbfc_certificate: file,
+        is_file_cbfc_certificate: 1,
+      }));
+
+      console.log("Selected file:", file);
+      // You can use FormData API to send the file to the server via fetch or Axios
+      // For example:
+      // const formData = new FormData();
+      // formData.append('file', file);
+      // Then use fetch or Axios to send formData to your backend
+    } else {
+      setSelectedCbfcFile(null);
+      setError('Please upload a PDF file.');
+      setFormData((prevState) => ({
+        ...prevState,
+        file_cbfc_certificate: null,
+        is_file_cbfc_certificate: false,
+      }));
+    }
   };
 
 
 
   const [selectedAttachCopyFile, setSelectedAttachCopyFile] = useState(null);
+  const [copyfileerror, setCopyfileerror] = useState('');
 
   const handleFileAttachCopyChange = (event) => {
-    setSelectedAttachCopyFile(event.target.files[0]);
     const file = event.target.files[0];
+    
+    if (file && file.type === 'application/pdf') {
+      setSelectedAttachCopyFile(file);
+      setCopyfileerror('');
+      setFormData((prevState) => ({
+        ...prevState,
+        declaration_clause_file: file,
+        is_declaration_clause_file: 1,
+      }));
 
-    console.log(file, "file attach");
-    setFormData((prevState) => ({
-      ...prevState,
-      uncensored_file: file,
-      is_declaration_clause_file: 1,
-    }));
+      console.log("Selected file:", file);
+      // You can use FormData API to send the file to the server via fetch or Axios
+      // For example:
+      // const formData = new FormData();
+      // formData.append('file', file);
+      // Then use fetch or Axios to send formData to your backend
+    } else {
+      setSelectedAttachCopyFile(null);
+      setCopyfileerror('Please upload a PDF file.');
+      setFormData((prevState) => ({
+        ...prevState,
+        declaration_clause_file: null,
+        is_declaration_clause_file: false,
+      }));
+    }
   };
 
   const handleChangeDateOfCompletionProduction = (e) => {
@@ -182,8 +217,8 @@ const CbfcCertification = ({ formData, setFormData, errors, setCbfcErrors }) => 
         {
           (formData.film_is_certified_by_cbfc_or_uncensored == 1) ?
             <>
-              <div className='row mt-4'>
-                <div className="col-sm-12 col-md-6 col-lg-6">
+              <div className='row'>
+                <div className="col-sm-12 col-md-12 col-lg-12">
                   <div className="input_field"
                   // style={{
                   //   border: "1px solid #CF528A",
@@ -195,7 +230,7 @@ const CbfcCertification = ({ formData, setFormData, errors, setCbfcErrors }) => 
                 </div>
 
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={12} md={6} lg={6}>
+                  <Grid item xs={12} sm={12} md={12} lg={12}>
                     <Box style={{ width: "100%" }}>
                       <FormControl
                         sx={{
@@ -228,8 +263,8 @@ const CbfcCertification = ({ formData, setFormData, errors, setCbfcErrors }) => 
                                   width: {
                                     xs: '100%',
                                     sm: '100%',
-                                    md: '630px',
-                                    lg: '630px',
+                                    md: '100%',
+                                    lg: '100%',
                                   },
                                   borderRadius: {
                                     xs: '4px',
@@ -249,7 +284,7 @@ const CbfcCertification = ({ formData, setFormData, errors, setCbfcErrors }) => 
                       <p className="text-danger">{errors.date_of_cbfc_certificate}</p>
                     )}
                   </Grid>
-                  <Grid xs={12} sm={12} lg={6} md={6} className='mt-4'>
+                  <Grid xs={6} sm={6} lg={6} md={6} mt={2} mx={0}>
                     <Box>
                       <TextField
                         fullWidth
@@ -271,13 +306,13 @@ const CbfcCertification = ({ formData, setFormData, errors, setCbfcErrors }) => 
                       )}
                     </Box>
                   </Grid>
-                  <Grid item xs={12} sm={12} md={6} lg={6}>
+                  <Grid item xs={6} sm={6} md={6} lg={6}>
                     <Box>
                       <input
                         type="file"
                         accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,image/*"
                         onChange={handleFileCbfcChange}
-                        style={{ display: 'none', width: "100%" }}
+                        style={{ display: 'none', width: "100%", height:"10px" }}
                         id="fileInput"
                         name="file_cbfc_certificate"
                       // value={formData.file_cbfc_certificate}
@@ -302,14 +337,14 @@ const CbfcCertification = ({ formData, setFormData, errors, setCbfcErrors }) => 
                             style: {
                               // border: "1px solid #CF528A",
                               borderRadius: "5px",
-                              height: "108px",
+                              height: "54px",
                             },
                           }}
                           fullWidth
                         />
-                        {errors.file_cbfc_certificate && (
-                          <p className="text-danger">{errors.file_cbfc_certificate}</p>
-                        )}
+                    {error && (
+          <p className="text-danger">{error}</p>
+        )}
                         {!(formData?.documentData?.[4]) ? <></> : (
                           <div>
                             <span className="Attach_Photo_ID">
@@ -327,7 +362,7 @@ const CbfcCertification = ({ formData, setFormData, errors, setCbfcErrors }) => 
             ((formData.film_is_certified_by_cbfc_or_uncensored == 2) ?
               <>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={12} md={6} lg={6}>
+                  <Grid item xs={12} sm={12} md={12} lg={12} mt={2}>
                     <Box style={{ width: "100%" }}>
                       <FormControl
                         sx={{
@@ -360,8 +395,8 @@ const CbfcCertification = ({ formData, setFormData, errors, setCbfcErrors }) => 
                                   width: {
                                     xs: '100%',
                                     sm: '100%',
-                                    md: '630px',
-                                    lg: '630px',
+                                    md: '100%',
+                                    lg: '100%',
                                   },
                                   borderRadius: {
                                     xs: '4px',
@@ -382,7 +417,7 @@ const CbfcCertification = ({ formData, setFormData, errors, setCbfcErrors }) => 
 
 
                   </Grid>
-                  <Grid xs={12} sm={12} md={6} lg={6}>
+                  <Grid xs={12} sm={12} md={12} lg={12} mt={2} mx={2}>
                     <Box>
                       <input
                         type="file"
@@ -412,14 +447,14 @@ const CbfcCertification = ({ formData, setFormData, errors, setCbfcErrors }) => 
                             style: {
                               // border: "1px solid #CF528A",
                               borderRadius: "5px",
-                              height: "108px",
+                              height: "54px",
                             },
                           }}
                           fullWidth
                         />
-                        {errors.declaration_clause_file && (
-                          <p className="text-danger">{errors.declaration_clause_file}</p>
-                        )}
+                       {copyfileerror && (
+          <p className="text-danger">{copyfileerror}</p>
+        )}
                       </label>
                       {!(formData?.documentData?.[3]) ? <></> : (
                         <div>

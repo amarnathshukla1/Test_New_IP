@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import TextField from "@mui/material/TextField";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -6,11 +6,8 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import dayjs from 'dayjs';
@@ -72,7 +69,7 @@ const OtherDetails = ({ formData, setFormData, errors, setOtherErrors }) => {
   }
 
 
-  const handleChange = (e) => {
+ const handleChange = (e) => {
     const { name, value } = e.target;
 
     if (name === "film_comletion_during_12month" && (value === 0 || value === "0")) {
@@ -86,20 +83,10 @@ const OtherDetails = ({ formData, setFormData, errors, setOtherErrors }) => {
         ...prevData,
         [name]: value
       }));
-      errors[name] = ""
-      setOtherErrors(errors);
-
+    errors[name] = ""
+    setOtherErrors(errors);
     }
-
-
-    // If "No" is selected, show the modal
-
-    // if (name === "film_comletion_during_12month" && value == "0") {
-    //   setOpen(true);
-    // }
-
   };
-
   const handleFilmScreenChange = (e) => {
     const { name, value } = e.target;
 
@@ -187,24 +174,34 @@ const OtherDetails = ({ formData, setFormData, errors, setOtherErrors }) => {
     setOpenOtherDetailsOpen(true);
   };
 
-
-
   useEffect(() => {
-    // Fetch data from backend and ensure that null values are converted to empty strings
     const fetchData = async () => {
-      const backendData = {
-        details_of_awards_won_if_any: null, // Example data from backend
-      };
+      try {
+        const backendData = {
+          details_of_awards_won_if_any: "null" // Example data from backend
+        };
 
-      setFormData(prevData => ({
-        ...prevData,
-        details_of_awards_won_if_any: backendData.details_of_awards_won_if_any ?? ''
+        console.log('Raw backend data:', backendData); // Log raw data
+         // Helper function to replace null or "null" with an empty string
+         const replaceNull = (value) => (value === null || value === "null" ? '' : value);
 
-      }));
+        const processedData = {
+          details_of_awards_won_if_any: replaceNull(backendData.details_of_awards_won_if_any)
+        };
+
+        console.log('Processed data:', processedData); // Log processed data
+
+        setFormData(prevData => ({
+          ...prevData,
+          ...processedData,
+        }));
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     };
 
     fetchData();
-  }, [setFormData]);
+}, [setFormData]);
 
 
   return (
@@ -387,8 +384,8 @@ const OtherDetails = ({ formData, setFormData, errors, setOtherErrors }) => {
                               width: {
                                 xs: '100%',
                                 sm: '100%',
-                                md: '640px',
-                                lg: '640px',
+                                md: '100%',
+                                lg: '100%',
                               },
                               borderRadius: {
                                 xs: '4px',
@@ -537,8 +534,8 @@ const OtherDetails = ({ formData, setFormData, errors, setOtherErrors }) => {
                                 width: {
                                   xs: '100%',
                                   sm: '100%',
-                                  md: '635px',
-                                  lg: '635px',
+                                  md: '100%',
+                                  lg: '100%',
                                 },
                                 borderRadius: {
                                   xs: '4px',
@@ -607,7 +604,7 @@ const OtherDetails = ({ formData, setFormData, errors, setOtherErrors }) => {
         {(formData.film_screened_outside_india == 1) ?
 
           <>
-            <Grid container spacing={2} className='mt-4'>
+            <Grid container spacing={2} mt={2}>
               <Grid item xs={12} sm={12} md={6} lg={6}>
                 <TextField
                   fullWidth
@@ -661,8 +658,8 @@ const OtherDetails = ({ formData, setFormData, errors, setOtherErrors }) => {
                               width: {
                                 xs: '100%',
                                 sm: '100%',
-                                md: '635px',
-                                lg: '635px',
+                                md: '100%',
+                                lg: '100%',
                               },
                               borderRadius: {
                                 xs: '4px',
@@ -732,7 +729,7 @@ const OtherDetails = ({ formData, setFormData, errors, setOtherErrors }) => {
         {(formData.film_participated_compentitaion == 1) ?
 
           <>
-            <Grid container spacing={2} className='mt-4'>
+            <Grid container spacing={2} >
               <Grid item xs={12} sm={12} md={5} lg={6}>
                 <Box>
                   <TextField
@@ -839,18 +836,15 @@ const OtherDetails = ({ formData, setFormData, errors, setOtherErrors }) => {
           <div className='col-sm-12 col-lg-6 mt-4'>
             <div class="form-floating">
               <textarea class="form-control" placeholder="Details of the Awards won(if any)" id="awards" style={{ height: "100px", borderRadius: "5px" }}
-                name="details_of_awards_won_if_any"
-
-                // value={formData.details_of_awards_won_if_any}
-                value={formData.details_of_awards_won_if_any ?? ''}
-
-                onChange={handleChange}
+ name="details_of_awards_won_if_any"
+ value={formData.details_of_awards_won_if_any}
+ onChange={handleChange}
               ></textarea>
               <label for="awards" style={{ fontWeight: "normal" }}>Details of the Awards won(if any)</label>
             </div>
-            {errors.details_of_awards_won_if_any && (
+            {/* {errors.details_of_awards_won_if_any && (
               <p className="text-danger">{errors.details_of_awards_won_if_any}</p>
-            )}
+            )} */}
           </div>
         </div>
       </form>

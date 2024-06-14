@@ -282,9 +282,9 @@ const Preview = ({ formData, setActiveStep }) => {
 
                                     <div class="col-md-6">
                                         <p>
-                                        <span className='titleoffield'>{(formData.category == 2 ? 'Value of the DCP/Bluray/Pendrive' :'Value of the DCP/Bluray')}
-                                        <span className='inputoffield'>:{formData.value_of_dcp_or_blueray}</span>
-                                        </span>
+                                            <span className='titleoffield'>{(formData.category == 2 ? 'Value of the DCP/Bluray/Pendrive' : 'Value of the DCP/Bluray')}
+                                                <span className='inputoffield'>:{formData.value_of_dcp_or_blueray}</span>
+                                            </span>
                                         </p>
                                     </div>
                                     {/* <div class="col-md-6">
@@ -421,10 +421,10 @@ const Preview = ({ formData, setActiveStep }) => {
                                         <div className='col-md-12 col-lg-12'>
                                         </div>
                                     </div>
-                                        {
-                                            preData.map((item, index) => (
-                                                <div className='col-md-6'>
-                                                    <div className="card" style={{ width: "100%" }}>
+                                    {
+                                        preData.map((item, index) => (
+                                            <div className='col-md-6'>
+                                                <div className="card" style={{ width: "100%" }}>
                                                     <div className="card-body">
                                                         <p><span className="titleoffield">Co Producer Details</span>
                                                         </p>
@@ -453,10 +453,10 @@ const Preview = ({ formData, setActiveStep }) => {
                                                     </div>
                                                 </div>
 
-                                                </div>
-                                                
-                                            ))}
-                                   
+                                            </div>
+
+                                        ))}
+
 
 
 

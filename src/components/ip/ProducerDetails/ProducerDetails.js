@@ -255,41 +255,65 @@ const ProducerDetails = ({ formData, setFormData, errors, setProducerErrors }) =
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedGovtFile, setSelectedGovtFile] = useState(null);
   const [selectedPassportFile, setSelectedPassportFile] = useState(null);
+  const [formErrors, setFormErrors] = useState({});
+  const [coproducererrors, setCoproducererrors] = useState('');
 
 
   const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
+ 
     const file = event.target.files[0];
-    // Do something with the uploaded file
+    let newErrors = { ...errors }; // Copy the existing errors
 
-    setFormData((prevState) => ({
-      ...prevState,
-      producer_id_proof: file,
-      is_producer_id_proof: true,
-    }));
-    if (selectedFile) {
-      console.log("Selected file:", selectedFile);
-      // You can use FormData API to send the file to the server via fetch or Axios
-      // For example:
-      // const formData = new FormData();
-      // formData.append('file', selectedFile);
-      // Then use fetch or Axios to send formData to your backend
-    } else {
-      console.log("No file selected");
+    if (file) {
+      if (file.type !== 'application/pdf') {
+        newErrors.producer_id_proof = 'Please upload a PDF file.';
+        setSelectedFile(null);
+        setFormData((prevState) => ({
+          ...prevState,
+          producer_id_proof: null,
+          is_producer_id_proof: 0,
+        }));
+      } else {
+        // Clear all errors when a valid PDF is uploaded
+        newErrors = {}; // Clear all errors
+        setSelectedFile(file);
+        setFormData((prevState) => ({
+          ...prevState,
+          producer_id_proof: file,
+          is_producer_id_proof: 1,
+        }));
+      }
     }
+
+    setFormErrors(newErrors);
   };
 
   const handleGovtFileChange = (event) => {
-    setSelectedGovtFile(event.target.files[0]);
-    const file = event.target.files[0];
-    // Do something with the uploaded file
-    console.log(file, "file");
-    setCoProducerFormData((prevState) => ({
-      ...prevState,
-      co_producer_id_proof: file,
-      is_gov_id_proof: true
-    }));
+    const govfile = event.target.files[0];
+    let newErrors = { ...errors }; // Copy the existing errors
 
+    if (govfile) {
+      if (govfile.type !== 'application/pdf') {
+        newErrors.co_producer_id_proof = 'Please upload a PDF file.';
+        setSelectedGovtFile(null);
+        setFormData((prevState) => ({
+          ...prevState,
+          co_producer_id_proof: null,
+          is_co_producer_id_proof: 0,
+        }));
+      } else {
+        // Clear all errors when a valid PDF is uploaded
+        newErrors.co_producer_id_proof = {}; // Clear all errors
+        setSelectedGovtFile(govfile);
+        setFormData((prevState) => ({
+          ...prevState,
+          co_producer_id_proof: govfile,
+          is_co_producer_id_proof: 1,
+        }));
+      }
+    }
+
+    setFormErrors(newErrors);
   };
 
   const handlePassportFileChange = (event) => {
@@ -587,26 +611,44 @@ const ProducerDetails = ({ formData, setFormData, errors, setProducerErrors }) =
   };
 
   useEffect(() => {
-    // Fetch data from backend and ensure that null values are converted to empty strings
+    // Function to fetch data from backend
     const fetchData = async () => {
-      const backendData = {
-        producer_landline: null,
-        producer_website: null,
+        try {
+            // Simulate fetching data from the backend
+            const backendData = {
+              producer_landline: "null", // Example data from backend
+              producer_website: "null",
+              landline:"null"
+            };
 
+            console.log('Raw backend data:', backendData); // Log raw data
 
+            // Helper function to replace null or "null" with an empty string
+            const replaceNull = (value) => (value === null || value === "null" ? '' : value);
 
-      };
+            // Processed data
+            const processedData = {
+              producer_landline: replaceNull(backendData.producer_landline),
+              producer_website: replaceNull(backendData.producer_website),
+              landline: replaceNull(backendData.landline)
+            };
 
-      setFormData(prevData => ({
-        ...prevData,
-        producer_website: backendData.producer_website ?? '',
+            console.log('Processed data:', processedData); // Log processed data
 
-
-      }));
+            // Update form data with fetched data
+            setFormData(prevData => ({
+                ...prevData,
+                ...processedData,
+            }));
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            // Handle the error as needed (e.g., show a notification to the user)
+        }
     };
 
     fetchData();
-  }, [setFormData]);
+}, [setFormData]);
+
   return (
     <>
       <h4 className="text-capitalize">
@@ -767,7 +809,7 @@ const ProducerDetails = ({ formData, setFormData, errors, setProducerErrors }) =
                   className="input_border"
                   name="producer_landline"
                   // value={formData.producer_landline}
-                  value={formData.producer_landline ?? ''}
+                  value={formData.producer_landline}
 
                   onChange={handleChange}
                 />
@@ -804,8 +846,7 @@ const ProducerDetails = ({ formData, setFormData, errors, setProducerErrors }) =
                   label='Website (optional)'
                   className="input_border"
                   name="producer_website"
-                  // value={formData.producer_website}
-                  value={formData.producer_website ?? ''}
+                  value={formData.producer_website}
                   onChange={handleChange}
                 />
                 {errors.producer_website && (
@@ -893,54 +934,52 @@ const ProducerDetails = ({ formData, setFormData, errors, setProducerErrors }) =
           <div className='col-sm-12 col-lg-6 mt-4'>
             <h6>Attach Photo ID issued by Govt. of India (for Indian National)<span className='text-danger'>*</span></h6>
             <input
-              type="file"
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,image/*"
-              onChange={handleFileChange}
-              style={{ display: 'none', width: "100%" }}
-              id="fileInput"
-              name="producer_id_proof"
-            // value={formData.producer_id_proof}
-            // onChange={handleChange} 
-            />
+          type="file"
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,image/*"
+          onChange={handleFileChange}
+          style={{ display: 'none', width: "100%" }}
+          id="fileInput"
+          name="producer_id_proof"
+        />
             {!(formData?.documentData?.[1]) ? <></> : (
-              <div>
-                <span className="Attach_Photo_ID">
-                  <a href={`${GLOBAL_URL}downloadfile/IP/${formData.id}/${formData?.documentData?.[1].file}`}>{formData?.documentData?.[1].name}</a>
-                </span>
-              </div>
-            )}
-            <label htmlFor="fileInput" style={{ width: "100%", height: "100%" }}>
-              <TextField
-                variant="outlined"
-                placeholder="Upload Your File in PDF Format Only"
-                value={selectedFile ? selectedFile.name : ''}
-                InputProps={{
-                  readOnly: true,
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => document.getElementById('fileInput').click()}
-                        edge="end"
-                      >
-                        <AttachFileIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                  style: {
-                    // border: "1px solid #CF528A",
-                    borderRadius: "5px",
-                    height: "108px",
-                  },
-                }}
-                fullWidth
-              />
-
-            </label>
-            {errors.producer_id_proof && (
-              <p className="text-danger">{errors.producer_id_proof}</p>
-            )}
-
+          <div>
+            <span className="Attach_Photo_ID">
+              <a href={`${GLOBAL_URL}downloadfile/IP/${formData.id}/${formData?.documentData?.[1].file}`}>{formData?.documentData?.[1].name}</a>
+            </span>
           </div>
+        )}
+             <label htmlFor="fileInput" style={{ width: "100%" }}>
+          <TextField
+            variant="outlined"
+            placeholder="Upload Your File in PDF Format Only"
+            value={selectedFile ? selectedFile.name : ''}
+            InputProps={{
+              readOnly: true,
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => document.getElementById('fileInput').click()}
+                    edge="end"
+                  >
+                    <AttachFileIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+              style: {
+                borderRadius: "5px",
+                height: "108px",
+              },
+            }}
+            fullWidth
+          />
+        </label>
+        {formErrors.producer_id_proof && (
+                <p className="text-danger">{formErrors.producer_id_proof}</p>
+              )}
+              {!formErrors.producer_id_proof && errors.producer_id_proof && (
+                <p className="text-danger">{errors.producer_id_proof}</p>
+              )}
+      </div>
         </div>
 
         <div className='row'>
@@ -1577,8 +1616,8 @@ const ProducerDetails = ({ formData, setFormData, errors, setProducerErrors }) =
                   <div className='col-sm-12 col-lg-12 mt-4'>
                     <h6>Attach Photo ID issued by Govt. of India (for Indian National)</h6>
                     <input
-                      type="file"
-                      accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,image/*"
+                       type="file"
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,image/*"
                       onChange={handleGovtFileChange}
                       style={{ display: 'none', width: "100%" }}
                       id="fileGovtPhotoId"
@@ -1586,7 +1625,7 @@ const ProducerDetails = ({ formData, setFormData, errors, setProducerErrors }) =
                     // value={formData.producer_id_proof}
                     // onChange={handleChange} 
                     />
-                    <label htmlFor="fileGovtPhotoId" style={{ width: "100%", height: "100%" }}>
+                    <label htmlFor="fileGovtPhotoId" style={{ width: "100%" }}>
                       <TextField
                         variant="outlined"
                         placeholder="Upload Your File in PDF Format Only"
@@ -1611,9 +1650,12 @@ const ProducerDetails = ({ formData, setFormData, errors, setProducerErrors }) =
                         }}
                         fullWidth
                       />
-                      {errorsCoProducer.gov_id_proof && (
-                        <p className="text-danger">{errorsCoProducer.gov_id_proof}</p>
-                      )}
+                           {formErrors.co_producer_id_proof && (
+                <p className="text-danger">{formErrors.co_producer_id_proof}</p>
+              )}
+              {!formErrors.co_producer_id_proof && errors.co_producer_id_proof && (
+                <p className="text-danger">{errors.co_producer_id_proof}</p>
+              )}
                     </label>
                   </div>
                 </>

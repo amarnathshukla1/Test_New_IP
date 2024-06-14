@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Grid } from '@mui/material'
 import Box from '@mui/material/Box';
 import { FormControl, TextField } from '@mui/material';
@@ -14,34 +14,8 @@ import Broadcasted from './Broadcasted';
 import InternationalCompetitions from './InternationalCompetitions';
 
 
-const OttPlatform = ({ formData, setFormData, errors, setOttPlatformErrors }) => {
-    const [showCastAndCrewRemoveButton, setShowCastAndCrewRemoveButton] = useState(false)
-    const [selectedDetailsCastCrewFile, setSelectedDetailsCastCrewFile] = useState(null);
+const OttPlatform = ({ formData, setFormData, errors, setOttPlatformErrors, datatest }) => {
 
-
-    const [country, setCountry] = React.useState('');
-
-    const handleselectedDetailsCastCrewFile = (event) => {
-        setSelectedDetailsCastCrewFile(event.target.files[0]);
-        setShowCastAndCrewRemoveButton(true)
-        const DetailsCastCrewfile = event.target.files[0];
-        // Do something with the uploaded file
-        console.log(DetailsCastCrewfile);
-        setFormData((prevState) => ({
-            ...prevState,
-            details_of_cast_crew: DetailsCastCrewfile,
-            is_details_of_cast_crew: 1,
-        }));
-    };
-    const handleCastAndCrewAttachClick = () => {
-        setShowCastAndCrewRemoveButton(true)
-    }
-
-    const handleCastAndCrewRemoveClick = () => {
-        setShowCastAndCrewRemoveButton(false)
-        setSelectedDetailsCastCrewFile(null)
-
-    }
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -49,14 +23,11 @@ const OttPlatform = ({ formData, setFormData, errors, setOttPlatformErrors }) =>
             ...formData,
             [name]: value
         });
-        errors[name] = ""
-        setOttPlatformErrors(errors);
-
     };
     return (
         <>
             <h5 className="text-capitalize">
-                Details Of Streaming OTT Patform<span className="text-danger">*</span>
+                Details Of Streaming OTT Patform<span className="text-danger"> *</span>
             </h5>
 
             <form>
@@ -168,7 +139,13 @@ const OttPlatform = ({ formData, setFormData, errors, setOttPlatformErrors }) =>
                                 )}
                             </Grid>
 
-                            {(formData.is_released_other_country == 1) ? <><StreamedCountry /></> : <></>}
+                            {(formData.is_released_other_country == 1) ? <><StreamedCountry
+
+                                    setFormDataMain={setFormData}
+                                    formDataMain={formData}
+                                    setOttPlatformErrors={setOttPlatformErrors}
+                                    errors={errors}
+                                /></> : <></>}
 
                         </Grid>
 
@@ -213,7 +190,15 @@ const OttPlatform = ({ formData, setFormData, errors, setOttPlatformErrors }) =>
 
                             </Grid>
 
-                            {(formData.is_thretrical_screening == 1) ? <> <ThreatricalScreening /></> : <></>}
+                            {(formData.is_thretrical_screening == 1) ? <> <ThreatricalScreening
+
+
+                                setFormDataMain={setFormData}
+                                formDataMain={formData}
+                                setOttPlatformErrors={setOttPlatformErrors}
+                                errors={errors}
+
+                            /></> : <></>}
 
                         </Grid>
 
@@ -256,7 +241,13 @@ const OttPlatform = ({ formData, setFormData, errors, setOttPlatformErrors }) =>
                                     <p className="text-danger">{errors.is_streamed_other_media}</p>
                                 )}
                             </Grid>
-                            {(formData.is_streamed_other_media == 1) ? <> <Broadcasted /></> : <></>}
+                            {(formData.is_streamed_other_media == 1) ? <> <Broadcasted
+
+                                setFormDataMain={setFormData}
+                                formDataMain={formData}
+                                setOttPlatformErrors={setOttPlatformErrors}
+                                errors={errors}
+                            /></> : <></>}
                         </Grid>
 
                         <Grid container spacing={2} className='mt-4'>
@@ -299,85 +290,16 @@ const OttPlatform = ({ formData, setFormData, errors, setOttPlatformErrors }) =>
                                 )}
                             </Grid>
 
-                            {(formData.is_international_competition == 1) ? <><InternationalCompetitions /></> : <></>}
+                            {(formData.is_international_competition == 1) ? <><InternationalCompetitions
 
-                            {/* <Grid item xs={12} sm={12} md={12} lg={12}>
-                                <Box className='d-flex align-items-center justify-content-end'>
-                                    <Box>
-                                        {showCastAndCrewRemoveButton ? (
-                                            <button style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: '#FF0000', width: '100%' }} onClick={handleCastAndCrewRemoveClick}>
-                                                <img src={RemoveIcon} alt='remove icon' style={{ marginRight: '5px' }} /><p style={{ margin: 0 }}>Remove</p>
-                                            </button>
-                                        ) : (
-                                            <button style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: 'black', width: '100%' }} onClick={handleCastAndCrewAttachClick}>
-                                                <img src={PlusIcon} alt='plus icon' style={{ marginRight: '5px' }} /><p style={{ margin: 0 }}>Add More</p>
-                                            </button>
-                                        )}
-                                    </Box>
-                                </Box>
-                            </Grid> */}
-                            {/* 
-                            <Grid item xs={12} sm={12} md={6} lg={6}>
-                                <Box>
-                                    <TextField
-                                        label="Name of the Competition"
-                                        type="text"
-                                        fullWidth
-                                    />
-                                </Box>
-                            </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={6}>
+                                setFormDataMain={setFormData}
+                                formDataMain={formData}
+                                setOttPlatformErrors={setOttPlatformErrors}
+                                errors={errors}
+                            /></> : <></>}
 
 
-                                <Box
-                                    sx={{
-                                        width: '100%',
-                                    }}
-                                >
-                                    <FormControl
-                                        sx={{
-                                            width: {
-                                                xs: '100%', // 100% width on extra-small screens
-                                                sm: '100%', // 100% width on small screens
-                                                md: '100%', // 100% width on medium screens
-                                                lg: '100%', // 100% width on large screens
-                                            }
-                                        }}
-                                    >
-                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                            <DatePicker
-                                                label="Date of the Competition"
-                                                name="Date of Streaming"
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        height: {
-                                                            xs: '48px', // height for extra-small screens
-                                                            sm: '52px', // height for small screens
-                                                            md: '56px', // height for medium screens
-                                                            lg: '62px', // height for large screens
-                                                        },
-                                                        borderRadius: {
-                                                            xs: '4px', // border-radius for extra-small screens
-                                                            sm: '5px', // border-radius for small screens
-                                                            md: '6px', // border-radius for medium screens
-                                                            lg: '7px', // border-radius for large screens
-                                                        },
-                                                    }
-                                                }}
-                                            />
-                                        </LocalizationProvider>
-                                    </FormControl>
-                                </Box>
-                            </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={6}>
-                                <Box>
-                                    <TextField
-                                        label="Details of the Awards won (if any)"
-                                        type="text"
-                                        fullWidth
-                                    />
-                                </Box>
-                            </Grid> */}
+
                         </Grid>
 
 
