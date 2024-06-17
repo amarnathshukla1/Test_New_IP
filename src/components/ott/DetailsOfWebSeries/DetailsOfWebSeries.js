@@ -5,7 +5,7 @@ import { FormControl, TextField } from '@mui/material';
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 // import Paper from '@mui/material/Paper';
-import { styled } from '@mui/material/styles';
+// import { styled } from '@mui/material/styles';
 import { getRequestGlobal } from "../../../API/global"
 import InputLabel from '@mui/material/InputLabel';
 
@@ -172,7 +172,7 @@ const DetailsOfWebSeries = ({ formData, setFormData, errors, setWebSeriesErrors 
                                     name="is_subtitle_language_eng"
                                     id="is_subtitle_language_eng_yes"
                                     value="1"
-                                    checked={formData.is_subtitle_language_eng == 1}
+                                    checked={formData.is_subtitle_language_eng === 1}
                                     onChange={handleChange}
                                 />
                                 <label htmlFor="is_subtitle_language_eng_yes">Yes</label>

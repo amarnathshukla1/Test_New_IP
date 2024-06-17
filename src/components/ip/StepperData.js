@@ -32,6 +32,7 @@ import AlertMessage from '../AlertMessage';
 import { useMediaQuery, useTheme } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import { Link }  from 'react-router';
+import Loader from '../common/Loader/Loader';
 
 const steps = [
     "Film's Details",
@@ -85,7 +86,7 @@ const ModalComponent = ({ show, handleClose }) => {
 
 
 export default function HorizontalNonLinearStepper() {
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const { id = null, ip_step = 1 } = useParams();
 
     const dashboardnavi = useNavigate();
@@ -117,58 +118,64 @@ export default function HorizontalNonLinearStepper() {
     const [preData, setPredata] = useState({});
 
     const loadpreData = async () => {
-
         if (id) {
-            const predata = await getRequest(`ip_details/${id}`, {});
+          try {
+            console.log('Fetching data...');
+            const predata = await getRequest(`ip_details/${id}`, {}); // Make sure this function is defined and working correctly
             const loadpredata = predata.data;
+            console.log('Data fetched:', loadpredata);
+    
             setActiveStatus(loadpredata.step);
-            setActiveStep(loadpredata.step)
+            setActiveStep(loadpredata.step);
+            
             const documentData = {};
             if (loadpredata.documents) {
-                for (const document of loadpredata.documents) {
-                    if (document.type == 1) loadpredata.is_producer_id_proof = 1;
-                    else if (document.type == 2) loadpredata.is_director_id_proof = 1;
-                    else if (document.type == 3) loadpredata.is_declaration_clause_file = 1;
-                    else if (document.type == 4) loadpredata.is_file_cbfc_certificate = 1;
-                    else if (document.type == 5) loadpredata.is_authorization_latter = 1;
-                    else if (document.type == 6) loadpredata.is_declaration_latter = 1;
-                    else if (document.type == 7) loadpredata.is_synopsis_in_english = 1;
-                    else if (document.type == 8) loadpredata.is_directors_profile = 1;
-                    else if (document.type == 9) loadpredata.is_producers_profile = 1;
-                    else if (document.type == 10) loadpredata.is_details_of_cast_crew = 1;
-
-                    documentData[document.type] = {
-                        file: document.file,
-                        name: document.name
-                    }
+              for (const document of loadpredata.documents) {
+                switch(document.type) {
+                  case 1: loadpredata.is_producer_id_proof = 1; break;
+                  case 2: loadpredata.is_director_id_proof = 1; break;
+                  case 3: loadpredata.is_declaration_clause_file = 1; break;
+                  case 4: loadpredata.is_file_cbfc_certificate = 1; break;
+                  case 5: loadpredata.is_authorization_latter = 1; break;
+                  case 6: loadpredata.is_declaration_latter = 1; break;
+                  case 7: loadpredata.is_synopsis_in_english = 1; break;
+                  case 8: loadpredata.is_directors_profile = 1; break;
+                  case 9: loadpredata.is_producers_profile = 1; break;
+                  case 10: loadpredata.is_details_of_cast_crew = 1; break;
+                  default: break;
                 }
+                documentData[document.type] = {
+                  file: document.file,
+                  name: document.name
+                }
+              }
             }
             loadpredata.documentData = documentData;
-            console.log(loadpredata)
+    
             setFormData({
-                ...loadpredata,
-                date_of_cbfc_certificate: dayjs(loadpredata.date_of_cbfc_certificate),
-                date_of_completion_production: dayjs(loadpredata.date_of_completion_production),
-                date_of_festival: dayjs(loadpredata.date_of_festival),
-                date_of_release: dayjs(loadpredata.date_of_release_india),
-                date_of_release_date: dayjs(loadpredata.date_of_release_outside),
+              ...loadpredata,
+              date_of_cbfc_certificate: dayjs(loadpredata.date_of_cbfc_certificate),
+              date_of_completion_production: dayjs(loadpredata.date_of_completion_production),
+              date_of_festival: dayjs(loadpredata.date_of_festival),
+              date_of_release: dayjs(loadpredata.date_of_release_india),
+              date_of_release_date: dayjs(loadpredata.date_of_release_outside),
             });
-            // updatedFormData.date_of_release_india = convertDate(updatedFormData.date_of_release);
-            // updatedFormData.date_of_release_outside = convertDate(updatedFormData.date_of_release_date);
-
-
-            setPredata(predata.data);
+    
+            setPredata(loadpredata);
+            setLoading(false); // Ensure loading is set to false after fetching data
+          } catch (error) {
+            console.error('Error fetching data:', error);
+            setLoading(false); // Ensure loading is set to false even if an error occurs
+          }
         }
-    }
+      }
     useEffect(() => {
-        verifyExistingRecord();
-        // Show modal when component mounts
-        console.log("1st use effect")
+        console.log('Component mounted or id changed');
+        verifyExistingRecord(); // Ensure this function is defined and working correctly
         loadpreData();
-
         setActiveStep(parseInt(ip_step - 1))
 
-    }, []);
+      }, [id]); // Depend on id to refetch data if it changes
 
     const navigate = useNavigate()
     const [activeStep, setActiveStep] = useState(0);
@@ -852,9 +859,6 @@ export default function HorizontalNonLinearStepper() {
             }
         }
 
-        if (!director_landline) {
-            // errorsDirector.director_landline = "Director landline is required";
-        }
         if (!director_mobile) {
             errorsDirector.director_mobile = "Enter mobile number";
         } else {
@@ -862,12 +866,7 @@ export default function HorizontalNonLinearStepper() {
                 errorsDirector.director_mobile = "Mobile number must be of 10 digit.";
             }
         }
-        if (!director_fax) {
-            // errorsDirector.director_fax = "Director fax is required";
-        }
-        if (!director_website) {
-            // errorsDirector.director_website = "Director website is required";
-        }
+  
         if (!director_address) {
             errorsDirector.director_address = "Enter your address";
         }
@@ -1222,7 +1221,10 @@ export default function HorizontalNonLinearStepper() {
         return Object.keys(completed).length === steps.length;
       };
       
-
+      console.log('Current loading state:', loading);
+      console.log('Current preData:', preData);
+      console.log('Current activeStep:', activeStep);
+      console.log('Current formData:', formData);
     return (
 
         <>
@@ -1230,19 +1232,13 @@ export default function HorizontalNonLinearStepper() {
 
             <AlertMessage handleClickOpen={handleClickOpen} setOpen={setOpen} open={open} handleClose={handleClose} data={alertData} />
 
-            {loading && (
-                <Box display="flex" justifyContent="center" alignItems="center" 
-                    width="100%" height="100%" position="absolute"
-                    // bgcolor="rgba(99, 35, 64, 0.5)"
-                    bgcolor="rgb(211, 211, 211)"
-                >
-                    <CircularProgress />
-                </Box>
-            )}
 
-         
 
-            <Box className="steppper">
+     
+            {loading && <Loader />}
+
+
+            <Box className={`steppper ${loading ? 'loading' : ''}`}>
           <div className='container'>
       <div className='row justify-content-center align-items-center mt-2 mb-2'>
         <div className='col-4 col-md-3 col-lg-4 col-xl-4'>
@@ -1352,6 +1348,7 @@ export default function HorizontalNonLinearStepper() {
 
 
             </Box>
+
         </>
 
     );

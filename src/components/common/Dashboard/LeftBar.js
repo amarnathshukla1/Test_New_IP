@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from "../../../assets/images/logo.svg"
+import logo from "../../../assets/images/logo.svg";
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
@@ -36,7 +36,6 @@ const LeftBar = ({ value, onChange }) => {
                         alt="NFDC Cinemas of india"
                     />
                 </div>
-
             </div>
             <Tabs
                 orientation={isMobile ? "horizontal" : "vertical"}
@@ -45,11 +44,31 @@ const LeftBar = ({ value, onChange }) => {
                 value={value}
                 onChange={handleChange}
                 aria-label="Vertical tabs example"
-                sx={{ borderRight: isMobile ? 0 : 1, borderColor: 'divider' }}
+                sx={{
+                    borderRight: isMobile ? 0 : 1,
+                    borderColor: 'divider',
+                    color: 'white !important',
+                    '& .Mui-selected': {
+                        color: 'white !important',
+                    }
+                }}
             >
-                <Tab label="Indian Panorama" {...a11yProps(0)} />
-                <Tab label="OTT" {...a11yProps(1)} />
-                <Tab label="CMOT" {...a11yProps(2)} />
+                <Tab label="Indian Panorama" {...a11yProps(0)}  sx={{
+         color: 'white !important',
+           
+        }} />
+                <Tab label="OTT" {...a11yProps(1)} 
+                 sx={{
+                    color: 'white !important',
+                      
+                   }}
+                />
+                <Tab label="CMOT" {...a11yProps(2)}
+                 sx={{
+                    color: 'white !important',
+                      
+                   }}
+                />
             </Tabs>
             <div className='log_out_btn' style={{ padding: '10px' }}>
                 <Button variant="outlined" startIcon={<LogoutIcon />} style={{ color: 'white', border: 'none', marginRight: '2rem' }} href="/logout">

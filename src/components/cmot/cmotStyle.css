@@ -1,4 +1,45 @@
-*{
+* {
     padding: 0;
     margin: 0;
+}
+
+.cmotappbar {
+    background-color: white !important;
+    box-shadow: unset !important;
+    color: blue !important;
+}
+
+.imgLogo {
+    width: 92px;
+    height: 50px;
+    display: block;
+}
+
+.textArea {
+    height: 200px;
+}
+
+.bttnn {
+    background-color: #632340 !important;
+    color: rgb(255, 255, 255) !important;
+}
+
+.checkboxcmot svg {
+    color: #632340;
+}
+
+.comtsteper .Mui-completed,.Mui-active svg {
+    color: #632340;
+}
+
+@media (max-width: 770px) {
+    .css-m5vj9m-MuiStepper-root {
+        display: none !important;
+    }
+
+    .imgLogo {
+        width: 60px;
+        height: 40px;
+        display: block;
+    }
 }

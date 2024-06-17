@@ -659,7 +659,7 @@ const OttStepperData = () => {
     // };
 
     const renderStepContent = (step) => {
-        console.log('aditya',{step})
+        console.log('aditya', { step })
         switch (step) {
             case 0:
                 return <DetailsOfWebSeries formData={formData} setFormData={setFormData} errors={webSeriesErrors} setWebSeriesErrors={setWebSeriesErrors} />

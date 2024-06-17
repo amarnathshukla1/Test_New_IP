@@ -181,10 +181,10 @@ const PartialInfo = ({ setFormDataMain, errors, FormDataMain, setProducerErrors 
     const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
     const [prepareDelete, setPrepareDelete] = useState(null);
 
-    const handleDeleteOpen = (e) => {
+    const handleDeleteOpen = (data, e) => {
         e.preventDefault();
-        const { name, value } = e.target;
-        setPrepareDelete(value);
+
+        setPrepareDelete(data);
         setOpenDeleteConfirm(true);
     };
 
@@ -236,14 +236,12 @@ const PartialInfo = ({ setFormDataMain, errors, FormDataMain, setProducerErrors 
                                         // onClick=
                                         // {(event) => submitDelete(item.id, event)}
                                         value={item.id}
-                                        onClick={handleDeleteOpen}
+                                        name="handledelete"
+                                        onClick={(e) => handleDeleteOpen(item.id, e)}
                                     >
                                         <DeleteOutlinedIcon style={{ color: 'white' }} />
                                     </button>
-                                    {/* <Button value={item.id}
-                                        onClick={handleDeleteOpen} variant="outlined" color="error" startIcon={<DeleteIcon style={{ color: '#d32f2f' }} />}>
-                                        Delete
-                                    </Button> */}
+
                                     <DeleteDialog open={openDeleteConfirm} handleClose={handleDeleteClose} handleDelete={submitDelete} />
                                 </div>
                                 <p>Name : <b>{item.name}</b></p>
