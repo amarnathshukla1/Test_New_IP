@@ -122,6 +122,7 @@ export default function HorizontalNonLinearStepper() {
           try {
             console.log('Fetching data...');
             const predata = await getRequest(`ip_details/${id}`, {}); // Make sure this function is defined and working correctly
+            console.log('Received data:', predata);
             const loadpredata = predata.data;
             console.log('Data fetched:', loadpredata);
     
@@ -181,7 +182,7 @@ export default function HorizontalNonLinearStepper() {
     const [activeStep, setActiveStep] = useState(0);
     console.log(activeStep, "activeStepDetails")
     const [completed, setCompleted] = useState({});
-    // console.log(completed, "completed")
+    console.log(navigate, "navigate")
 
     const [formData, setFormData] = useState({
 
@@ -210,6 +211,7 @@ export default function HorizontalNonLinearStepper() {
         newCompleted[activeStep] = true;
         // handleNext();
         scrollUp()
+        console.log('Starting handleComplete with activeStep:', activeStep, 'and id:', id);
         if (activeStep === 0) {
 
 
@@ -1162,7 +1164,10 @@ export default function HorizontalNonLinearStepper() {
                 return 'Unknown step';
         }
     };
-    //   console.log(ip_step)
+      console.log('amar', ip_step)
+      console.log('Current ID:', id);
+      console.log('Starting handleComplete with activeStep:', activeStep);
+
     const [showModal, setShowModal] = useState((id) ? false : true);
 
     const [open, setOpen] = useState((id) ? false : true);
