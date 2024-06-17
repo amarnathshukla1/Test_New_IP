@@ -1215,6 +1215,10 @@ export default function HorizontalNonLinearStepper() {
         setOpen((id) ? false : true);
 
     }, []);
+
+    useEffect(() => {
+        setLoading(false); // Initial loading state set to false to disable loader
+      }, []);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const allStepsCompleted = () => {
